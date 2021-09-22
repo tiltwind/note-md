@@ -107,13 +107,15 @@ Consume tag filter is processed on broker side, only filter by tag hash code. So
 
 ### 4.3 Message Format
 
-Field | Size(bytes) | Desc
---- | --- | --- | 
+Fields in a message:
+
+Field | Bytes Size | Desc
+--- | --- | --- |
 msgSize | 4 | message size
 MAGICCODE | 4 | fixed `daa320a7`
 BODY CRC | 4 | check when broker restarting to recover
-queueId | 4 | 
-flag | 4 | 
+queueId | 4 | queue id
+flag | 4 | flag
 QUEUEOFFSET | 8 | sequence in consumeQueue or tranStateTable; For none-transaction message or commit message，`QUEUEOFFSET * 20` is the offset in consume queue; For Prepared or Rollback Message，used to find data in tranStateTable.
 PHYSICALOFFSET | 8 | offset in commit log
 SYSFLAG | 4 | 4 bytes from lower to high;`1st byte=1` means compressed; `2nd byte = 1` means MultiTags; `3rd byte = 1` means prepared message; `4th byte = 1` means commit message; `3rd&4th bytes = 1` means rollback message; `3rd&4th bytes = 0` means none-transaction message; 
@@ -124,11 +126,11 @@ STOREHOSTADDRESS | 8 | broker address:port
 RECONSUMETIMES | 8 | re-consumed times for a consume group (count separatedly), for retry-messages being send to topic `%retry%groupName`(queueId=0)
 PreparedTransaction Offset | 8 | transaction prepared message offset
 messagebodyLength | 4 | length of body
-messagebody | bodyLength | 
-topicLength | 1 |
-topic | topicLength |
-propertiesLength | 2 |
-properties | propertiesLength |
+messagebody | bodyLength | body
+topicLength | 1 | topic length
+topic | topicLength | topic
+propertiesLength | 2 | properties length
+properties | propertiesLength | properties
 
 
 ### 4.4 transaction message
