@@ -7,8 +7,7 @@ default:
 	markhtml . ../note/
 
 push: default
-	# $(call gitpush,update)
-	cd ../note & $(call gitpush,update) 
-	# cd ../note-md
+	$(call gitpush,update)
+	cd ../note && $(call gitpush,update) 
 
 
