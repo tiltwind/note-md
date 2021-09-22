@@ -10,8 +10,7 @@ default:
 
 push: default
 	$(call gitpush,update)
-	cd ../note 
-	$(call gitpush,update)
+	cd ../note & $(call gitpush,update)
 	cd ../note-md
 
 
