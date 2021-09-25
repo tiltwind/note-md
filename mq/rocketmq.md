@@ -199,7 +199,145 @@ Balance is done on client side both for provider and consumer.
 - `consumer balance`: In fact, push is based on pull, and pull again immediately after pulling a batch of messages. 
 
 
+## 6. Cluster
+
+Cluster Model | Performance | Available | Message lose |
+--- | --- | --- | --- |
+Mutiple Masters | High Performance | Not available when going down | No message lose
+Multple Masters, Multiple Slaves<br>Async Replication | High Performance (small replication latency for slaves) | Available when master going down | may lose some message when master going down
+Multple Masters, Multiple Slaves<br>Sync Replication | RT is higher, thoughput 10% lower than others | Available when master going down | No message lose
+
+
+### 6.1 broker configuration
+
+```bash
+# cluster name
+brokerClusterName=rocketmq-cluster
+
+# must different for different broker， slaves have the same name.
+brokerName=broker-a
+
+# 0:Master，>0:Slave
+brokerId=0
+
+# Broker IP
+brokerIP1=192.168.31.186
+
+# Broker listen port
+listenPort=10911
+
+# time to delete file, default 04:00
+deleteWhen=04
+
+# reserved time for files, default 48 hours
+fileReservedTime=120
+
+# Broker role，ASYNC_MASTER，SYNC_MASTER，SLAVE
+brokerRole=ASYNC_MASTER
+
+# flush disk type，ASYNC_FLUSH，SYNC_FLUSH
+flushDiskType=SYNC_FLUSH
+
+# nameServer addresses，format is ip1:port1;ip2:port2;ip3:port3
+namesrvAddr=192.168.31.186:9876;192.168.31.231:9876
+
+# queue numbers for topic, default 4. For load balance.
+defaultTopicQueueNums=8
+
+# whether create Topic automatically
+autoCreateTopicEnable=false
+
+# whether create subscription group automatically
+autoCreateSubscriptionGroup=false
+
+# store root path
+storePathRootDir=/data/rocketmq-all-4.9.1-bin-release/data/store-a
+
+# commitLog
+storePathCommitLog=/data/rocketmq-all-4.9.1-bin-release/data/store-a/commitlog
+
+# store path for consumer queue
+storePathConsumerQueue=/data/rocketmq-all-4.9.1-bin-release/data/store-a/consumequeue
+
+# store path for index
+storePathIndex=/data/rocketmq-all-4.9.1-bin-release/data/store-a/index
+
+# store path for checkpoints
+storeCheckpoint=/data/rocketmq-all-4.9.1-bin-release/data/store-a/checkpoint
+
+# store path for abort file
+abortFile=/data/rocketmq-all-4.9.1-bin-release/data/store-a/abort
+
+# size of one commitLog file, default 1G.
+mapedFileSizeCommitLog=1073741824
+
+# number of messages in one ConsumeQueue file, default 30W
+mapedFileSizeConsumeQueue=300000
+```
+
+### 6.2 replication
+
+```
+ ----------                                  ---------
+ |        | <---- report slave offset ----- |        |
+ | master |                                 |  slave |
+ |        | ---- send batch messages  ----> |        |
+ ----------                                  ---------
+
+```
+- slave report commit log offset to master;
+- master batch send messages to slave;
+- slave write messages to commit log;
+- slave report new offset to master;
+- master messages is success if its offset is less than the slave report offset
+
+
+> NOTE: master-slave cluster is not guarantee strong consistence between master and slaves.
+
+```java
+// CommitLog.java
+// public CompletableFuture<PutMessageResult> asyncPutMessage(final MessageExtBrokerInner msg) {
+// public CompletableFuture<PutMessageResult> asyncPutMessages(final MessageExtBatch messageExtBatch) {
+
+// 1. async flush to db 
+CompletableFuture<PutMessageStatus> flushResultFuture = submitFlushRequest(result, msg);
+// 2. async replicate to slave
+CompletableFuture<PutMessageStatus> replicaResultFuture = submitReplicaRequest(result, msg);
+return flushResultFuture.thenCombine(replicaResultFuture, (flushStatus, replicaStatus) -> {
+    if (flushStatus != PutMessageStatus.PUT_OK) {
+        putMessageResult.setPutMessageStatus(flushStatus);
+    }
+    if (replicaStatus != PutMessageStatus.PUT_OK) {
+        putMessageResult.setPutMessageStatus(replicaStatus);
+        if (replicaStatus == PutMessageStatus.FLUSH_SLAVE_TIMEOUT) {
+            log.error("do sync transfer other node, wait return, but failed, topic: {} tags: {} client address: {}",
+                    msg.getTopic(), msg.getTags(), msg.getBornHostNameString());
+        }
+    }
+    return putMessageResult;
+});
+```
+
+### 6.3 Dledger cluster
+
+dledger is a raft-based java library for building high-available, high-durable, strong-consistent commitlog, which could act as the persistent layer for distributed storage system, i.e. messaging, streaming, kv, db, etc.
+
+rocketmq support to change storage to [dledger](https://github.com/apache/rocketmq/tree/store_with_dledger), to provide consistence between master and slaves.
+
+
+## A. Reference
+
+- rocketmq features, https://github.com/apache/rocketmq/blob/master/docs/cn/features.md
+- rocketmq concept, https://github.com/apache/rocketmq/blob/master/docs/cn/concept.md
+- rocketmq architecture, https://github.com/apache/rocketmq/blob/master/docs/cn/architecture.md
+- rocketmq design, https://github.com/apache/rocketmq/blob/master/docs/cn/design.md
+- rocketmq operation, https://github.com/apache/rocketmq/blob/master/docs/cn/operation.md
+- RocketMQ消息的主从复制机制, https://www.jianshu.com/p/73aea81c180d
+- raft-base commitlog store, https://github.com/openmessaging/dledger
+
+
 ## History
 
+- 2021-09-25, add chapter `cluster`
 - 2021-09-13, first version
 
