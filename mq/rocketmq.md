@@ -56,12 +56,25 @@ Deploy strategy:
 
 ![](https://raw.githubusercontent.com/apache/rocketmq/master/docs/cn/image/rocketmq_design_1.png)
 
-- `CommitLog`: default 1G a file, the length of file name is 20, the format is `<0 prefix> + <offset>`. the first file name is  `00000000000000000000`, offset is 0，file size is 1G=1073741824, the second file name is `00000000001073741824`，offset is `1073741824`. One broker one commit log.
-- `ConsumeQueue`: logical consume queue, save at `$HOME/store/consumequeue/{topic}/{queueId}/{fileName}`,every message in consume queue is fixed format, `<8 bytes commit log offset> + <4 bytes message length> + <8 bytes tag hash code>`, total 30w messages for one file, so the file size is fixed 5.72M.
-- `IndexFile`: hash format index file, store at `$HOME \store\index${fileName}`, used to query message by key or time range.
+### 3.1 CommitLog
+
+* default 1G a file, the length of file name is 20, the format is `<0 prefix> + <offset>`. 
+* the first file name is  `00000000000000000000`, offset is 0，file size is 1G=1073741824, the second file name is `00000000001073741824`，offset is `1073741824`. 
+* One broker one commit log.
 
 
-### 3.1 Index File
+### 3.2 ConsumeQueue
+
+* logical consume queue, save at `$HOME/store/consumequeue/{topic}/{queueId}/{fileName}`
+* every message in consume queue is fixed format, `<8 bytes commit log offset> + <4 bytes message length> + <8 bytes tag hash code>`
+* total 30w messages for one file, so the file size is fixed 5.72M.
+
+
+### 3.3 Index File
+
+* hash format index file
+* store at `$HOME \store\index${fileName}`
+* used to query message by key or time range.
 
 ![](https://raw.githubusercontent.com/apache/rocketmq/master/docs/cn/image/rocketmq_design_13.png)
 
@@ -87,7 +100,7 @@ index_timestamp = Int4BytesAt(index_offset + 4 + 8) * 1000 + header_timestamp
 index_next_sequence = Int4BytesAt(index_offset + 4 + 8 + 4)
 ```
 
-### 3.1 write/read data
+### 3.4 write/read data
 
 Uses `PageCache` to flush data to disk to enhence write performance.
 ![](https://raw.githubusercontent.com/apache/rocketmq/master/docs/cn/image/rocketmq_design_2.png)
@@ -278,7 +291,7 @@ mapedFileSizeConsumeQueue=300000
 ### 6.2 replication
 
 ```
- ----------                                  ---------
+ _________                                  __________
  |        | <---- report slave offset ----- |        |
  | master |                                 |  slave |
  |        | ---- send batch messages  ----> |        |
