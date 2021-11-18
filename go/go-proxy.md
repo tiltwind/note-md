@@ -112,7 +112,7 @@ machine gitlab.mycompany.com login root password ROOTPASS
 假设访问地址为 http://192.168.15.212:3000.
 
 
-### 3.5. 构建使用
+### 3.5. 访问代理
 
 jenkins或本地开发设置 `export GOPROXY=http://192.168.15.212:3000,direct` 即可。
 
