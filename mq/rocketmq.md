@@ -185,6 +185,7 @@ messageDelayLevel=1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h
 ```
 
 Set delay time level:
+
 ```java
 Message msg = new Message();
 msg.setTopic("TopicA");
@@ -205,6 +206,27 @@ Delay message process:
 5. send message to original Topic&Queue.
 6. consumers consume from original Topic.
 
+
+### 4.7 reconsume message
+
+RocketMQ allows reconsume a message if consuming failed and return status `ConsumeConcurrentlyStatus.RECONSUME_LATER`, 
+then the message will be send to delay message topic as a delay message, 
+the delay time level is default 3 (means delay 10s), which will increase 1 if requesting reconsume again.
+The message will be discarded if the delay time level exceeds the max.
+So the max consume retry time is 16.
+
+```java
+consumer.registerMessageListener(new MessageListenerConcurrently() {
+   @Override
+   public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs,
+                                   ConsumeConcurrentlyContext context) {
+       // handle message failed
+
+       // return RECONSUME_LATER to reconsume later
+       return ConsumeConcurrentlyStatus.RECONSUME_LATER;
+   }
+});
+```
 
 ## 5. communication
 
@@ -381,7 +403,7 @@ rocketmq support to change storage to [dledger](https://github.com/apache/rocket
 
 ## History
 
-- 2021-12-22, add chapter `delay message`
+- 2021-12-22, add chapter `delay message`, `reconsume message`
 - 2021-09-25, add chapter `cluster`
 - 2021-09-13, first version
 
