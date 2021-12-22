@@ -9,7 +9,7 @@ markmeta_tags: rocketmq,mq
 # rocketmq
 
 
-![](https://rocketmq.apache.org/assets/images/rmq-basic-arc.png)
+![](images/rmq-basic-arc.png)
 
 
 - `Name Servers`: service discovery and routing. Each Name Server records full routing information.
@@ -31,7 +31,7 @@ Broker server is responsible for message store and delivery, message query, HA g
 
 As shown in image below, Broker server has several important sub modules:
 
-![](https://rocketmq.apache.org/assets/images/rmq-basic-component.png)
+![](images/rmq-basic-component.png)
 
 - `Remoting Module`: the entry of broker, handles the requests from clients.
 - `Client Manager`: manages the clients (Producer/Consumer) and maintains topic subscription of consumer.
@@ -54,7 +54,7 @@ Deploy strategy:
 
 ## 3. Storage
 
-![](https://raw.githubusercontent.com/apache/rocketmq/master/docs/cn/image/rocketmq_design_1.png)
+![](images/rocketmq_design_1.png)
 
 ### 3.1 CommitLog
 
@@ -76,7 +76,7 @@ Deploy strategy:
 * store at `$HOME \store\index${fileName}`
 * used to query message by key or time range.
 
-![](https://raw.githubusercontent.com/apache/rocketmq/master/docs/cn/image/rocketmq_design_13.png)
+![](images/rocketmq_design_13.png)
 
 - Header: fixed 40 bytes, includes create timestamp.
 - File Name: timestamp of create time
@@ -103,7 +103,7 @@ index_next_sequence = Int4BytesAt(index_offset + 4 + 8 + 4)
 ### 3.4 write/read data
 
 Uses `PageCache` to flush data to disk to enhence write performance.
-![](https://raw.githubusercontent.com/apache/rocketmq/master/docs/cn/image/rocketmq_design_2.png)
+![](images/rocketmq_design_2.png)
 
 Uses `MappedByteBuffer`(mmap) to enhence read performance.
 
@@ -112,7 +112,8 @@ Uses `MappedByteBuffer`(mmap) to enhence read performance.
 
 ### 4.1 Topic
 
-Topic, internally, is `logically partitioned` into one or more sub-topics. We call these sub-topics `message queues`. This concept plays a major role in implementing valuable features, including fail-over, maximum concurrency, etc.
+Topic, internally, is `logically partitioned` into one or more sub-topics. We call these sub-topics `message queues`. 
+This concept plays a major role in implementing valuable features, including fail-over, maximum concurrency, etc.
 
 ### 4.2 Tag
 
@@ -146,11 +147,15 @@ propertiesLength | 2 | properties length
 properties | propertiesLength | properties
 
 
-### 4.4 transaction message
+### 4.4 Message Id
+16 bytes: `<broker ip> + <broker port> + offset`
+
+
+### 4.5 transaction message
 
 Transaction message is based on 2PC and compensation check.
 
-![](https://raw.githubusercontent.com/apache/rocketmq/master/docs/cn/image/rocketmq_design_10.png)
+![](images/rocketmq_design_10.png)
 
 Two inner topics:
 - `half msg topic`: save half message
@@ -168,12 +173,37 @@ Two inner topics:
 
 If not receive op message, try to check the state of local transaction. Retry maximum 15 times, otherwise rollback message.
 
-![](https://raw.githubusercontent.com/apache/rocketmq/master/docs/cn/image/rocketmq_design_12.png)
+![](images/rocketmq_design_12.png)
 
 
-### 4.5 Message Id
-16 bytes: `<broker ip> + <broker port> + offset`
+### 4.6 delay message
 
+RocketMQ an inner topic `SCHEDULE_TOPIC_XXXX` and 18 queues for different delay time level.
+1st level queue delays 1s, 18th level queue delays 2h.
+```
+messageDelayLevel=1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h
+```
+
+Set delay time level:
+```java
+Message msg = new Message();
+msg.setTopic("TopicA");
+msg.setTags("Tag");
+msg.setBody("this is a delay message".getBytes());
+// set delay level to 5, means delay 1m
+msg.setDelayTimeLevel(5);
+producer.send(msg);
+```
+
+Delay message process:
+1. change the Topic&Queue to `SCHEDULE_TOPIC_XXXX` and delay time level queue, original Topic&Queue will be saved in message properties.
+    calculate the `delivery time`, which equals `storeTimestamp + delay_level_time`, as the `tag hash code`.
+2. send message to delay ConsumeQueue.
+3. `ScheduleMessageService` consume topic `SCHEDULE_TOPIC_XXXX`.
+    It will check the delivery time of the first message, and continue process next message if matches.
+4. `ScheduleMessageService` change Topic&Queue of the message to the original, then save message to CommitLog again.
+5. send message to original Topic&Queue.
+6. consumers consume from original Topic.
 
 
 ## 5. communication
@@ -182,7 +212,7 @@ communication between clients, brokers, nameservers.
 
 ### 5.1 communication message
 
-![](https://raw.githubusercontent.com/apache/rocketmq/master/docs/cn/image/rocketmq_design_4.png)
+![](images/rocketmq_design_4.png)
 
 Format:
 `<message length>(4 bytes) + <Serialization type>(1 byte) + <Header length>(3 bytes) + <Data Header> + <Message Body>`
@@ -351,6 +381,7 @@ rocketmq support to change storage to [dledger](https://github.com/apache/rocket
 
 ## History
 
+- 2021-12-22, add chapter `delay message`
 - 2021-09-25, add chapter `cluster`
 - 2021-09-13, first version
 
