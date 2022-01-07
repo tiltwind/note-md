@@ -209,9 +209,10 @@ Delay message process:
 
 ### 4.7 reconsume message
 
-RocketMQ allows reconsume a message if consuming failed and return status `ConsumeConcurrentlyStatus.RECONSUME_LATER`, 
-then the message will be send to delay message topic as a delay message, 
-the delay time level is default 3 (means delay 10s), which will increase 1 if requesting reconsume again.
+RocketMQ allows reconsuming a message if consuming failed and returning status `ConsumeConcurrentlyStatus.RECONSUME_LATER`, 
+then the message will be send to delay message topic as a delay message.
+
+The delay time level is default 3 (means delay 10s), and will be increased 1 if requesting to reconsume again.
 The message will be discarded if the delay time level exceeds the max.
 So the max consume retry time is 16.
 
