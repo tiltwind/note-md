@@ -61,12 +61,12 @@ export GOPRIVATE=gitlab.mycompany.com,*.mysubcompany.com,github.com/mycompany
 
 ### 3.1. 下载 athens
 
-从 [这里](https://github.com/gomods/athens/releases) 下周athens最新版本, 解压后得到 athens 可执行文件.
+从 [这里](https://github.com/gomods/athens/releases) 下载athens最新版本, 解压后得到 athens 可执行文件.
 
 ### 3.2. 创建 athens 配置文件
 
 创建一个配置文件  config.toml: 
-```conf
+```toml
 Port = ":3000"
 GoBinary = "go"
 GoEnv = "development"
@@ -109,12 +109,12 @@ machine gitlab.mycompany.com login root password ROOTPASS
 ./athens -config_file ./config.toml
 ```
 
-假设访问地址为 http://192.168.15.212:3000.
+访问地址为 `http://<ip>:3000`.
 
 
 ### 3.5. 访问代理
 
-jenkins或本地开发设置 `export GOPROXY=http://192.168.15.212:3000,direct` 即可。
+jenkins或本地开发设置 `export GOPROXY=http://<ip>:3000,direct` 即可。
 
 
 ## A. 参考
