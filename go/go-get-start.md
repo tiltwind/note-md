@@ -9,7 +9,7 @@ markmeta_tags: golang
 # Golang 入门
 
 **摘要**: 
-本文简要介绍了Go语言的发展历史，通过文字和源代码形式介绍Go语言基本语法、开发工具、并发模型、垃圾回收机制。
+本文简要介绍了Go语言的发展历史，通过文字和源代码形式介绍Go语言基本语法、开发工具、并发模型、垃圾回收机制等。
 本文作为Go语言的入门资料，读者可以通过本文快速了解Go语言的基本用法。
 
 
@@ -44,6 +44,8 @@ Go 提倡少即是多(Less is more)，语言设计简单实用。
 Go支持协程(goroutine)，可以调度上百万的协程任务。
 
 总结go的特点: 静态类型、静态编译、垃圾回收、并发支持、简单、安全、高效。
+
+![](images/golang-logo.jpeg)
 
 Go以囊地鼠（Gopher）作为它的吉祥物，go语言开发者也自称为gopher。
 
@@ -1446,6 +1448,8 @@ Go采用三色标记和写屏障：
 **参考**：
 - [Latency Problem Solved Go GC - Talks](http://talks.golang.org/2015/go-gc.pdf)
 - [Go GC算法](go-gc.html)
+- [[译] 现代垃圾回收](module-garbage-collection.html)
+- [goroutine 背后的系统知识](go-goroutine-knowledge.html)
 
 
 ## 24. Go 和 Java 性能对比

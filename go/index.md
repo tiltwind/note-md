@@ -12,8 +12,8 @@
 - 2019-03-12, [Go 调度器](go-scheduler.html), wongoo
 - 2019-03-12, [Go 三种指针](go-pointer.html), wongoo
 - 2019-03-12, [Go unsafe](go-unsafe.html), wongoo
-- 2019-03-12, [Go unsafe](go-memory-align.html), wongoo
 - 2019-03-12, [Go scheduler code analysis](go-scheduler-code-analysis.html), wongoo
+- 2019-03-12, [Go memory aligin](go-memory-align.html), wongoo
 - 2019-01-16, [Go atomic 原子操作](go-atomic-value.html), wongoo
 - 2019-01-16, [Go Learning](go-learning.html), wongoo
 - 2019-01-16, [Go Installation](go-install.html), wongoo
