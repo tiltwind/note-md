@@ -125,7 +125,7 @@ import "fmt"
 
 // main func
 func main() {
-    fmt.Println("Hello, " + "World")
+    println("Hello, " + "World")
 }
 ```
 
@@ -258,11 +258,11 @@ Go命名规则: 名字必须以一个字母（Unicode字母）或下划线开头
 func main() {
 	// 指定类型定义
 	var x string = "Hello World"
-	fmt.Println(x)
+	println(x)
 
 	// 编译器自动判断类型
 	name := "wongoo"
-	fmt.Println(name)
+	println(name)
 }
 ```
 
@@ -270,7 +270,7 @@ func main() {
 ```golang
 var x string = "Hello World"
 func main() {
-    fmt.Println(x)
+    println(x)
 }
 ```
 
@@ -278,10 +278,10 @@ func main() {
 ```golang
 const x := "Hello World"
 func main() {
-    fmt.Println(x)
+    println(x)
 
     const name string = "wongoo"
-	fmt.Println(name)
+	println(name)
 }
 ```
 
@@ -330,12 +330,12 @@ const (
 func main() {
     i := 1
     for i <= 10 {
-        fmt.Println(i)
+        println(i)
 		i = i + 1 
 	}
 
 	for j:=1; j <= 10; j++ {
-        fmt.Println(j)
+        println(j)
 	}
 }
 ```
@@ -354,23 +354,23 @@ if i % 2 == 0 {
 ### 8.3. switch 控制语句
 ```golang
 switch i {
-	case 0: fmt.Println("Zero")
-	case 1: fmt.Println("One")
-	case 2: fmt.Println("Two")
-	case 3: fmt.Println("Three")
-	case 4: fmt.Println("Four")
-	case 5: fmt.Println("Five")
-	default: fmt.Println("Unknown Number")
+	case 0: println("Zero")
+	case 1: println("One")
+	case 2: println("Two")
+	case 3: println("Three")
+	case 4: println("Four")
+	case 5: println("Five")
+	default: println("Unknown Number")
 }
 
 switch {
-	case i == 0: fmt.Println("Zero")
-	case i == 1: fmt.Println("One")
-	case i == 2: fmt.Println("Two")
-	case i == 3: fmt.Println("Three")
-	case i == 4: fmt.Println("Four")
-	case i == 5: fmt.Println("Five")
-	default: fmt.Println("Unknown Number")
+	case i == 0: println("Zero")
+	case i == 1: println("One")
+	case i == 2: println("Two")
+	case i == 3: println("Three")
+	case i == 4: println("Four")
+	case i == 5: println("Five")
+	default: println("Unknown Number")
 }
 
 
@@ -382,8 +382,8 @@ switch {
 ```golang
 var x [5]int
 x[4] = 100
-fmt.Println(x)  // [0 0 0 0 100]
-fmt.Println(len(x)) // 4 
+println(x)  // [0 0 0 0 100]
+println(len(x)) // 4 
 
 // 直接赋值
 x := [5]int{ 98, 93, 77, 82, 83 }
@@ -397,58 +397,58 @@ var x []int // 长度为0
 x := make([]int, 5) // 长度为5
 
 x := make([]int, 5, 10) // 长度为5, 容量为10
-fmt.Println(len(x)) // 5
-fmt.Println(cap(x)) // 10
+println(len(x)) // 5
+println(cap(x)) // 10
 x = x[:4]
-fmt.Println(len(x)) // 4
-fmt.Println(cap(x)) // 10
+println(len(x)) // 4
+println(cap(x)) // 10
 x = x[:10]
-fmt.Println(len(x)) // 10
-fmt.Println(cap(x)) // 10
+println(len(x)) // 10
+println(cap(x)) // 10
 x = x[5:]
-fmt.Println(len(x)) // 5
-fmt.Println(cap(x)) // 5
+println(len(x)) // 5
+println(cap(x)) // 5
 
 
 slice1 := []int{1, 2, 3}
 slice2 := make([]int, 2)
 copy(slice2, slice1)
-fmt.Println(slice1)      // [1,2,3]
-fmt.Println(slice2)      // [1,2]
-fmt.Println(len(slice2)) // 2
-fmt.Println(cap(slice2)) // 2
+println(slice1)      // [1,2,3]
+println(slice2)      // [1,2]
+println(len(slice2)) // 2
+println(cap(slice2)) // 2
 
 slice3 := append(slice2, 4, 5, 6)
-fmt.Println(slice3)      // [1,2,4,5,6]
-fmt.Println(len(slice3)) // 4
-fmt.Println(cap(slice3)) // 6
+println(slice3)      // [1,2,4,5,6]
+println(len(slice3)) // 4
+println(cap(slice3)) // 6
 ```
 
 ### 9.3. Map
 ```golang
 x := make(map[string]int)
 x["key"] = 10
-fmt.Println(x["key"]) // 10
+println(x["key"]) // 10
 
 y := make(map[int]int)
 y[1] = 10
-fmt.Println(y[1]) // 10
+println(y[1]) // 10
 
 // 判断map中是否存在某一个key再进行操作
 if v, ok := y[1]; ok {
-	fmt.Println(v) // 10
+	println(v) // 10
 }
 
 // 从map删除一个key
 delete(y, 1)
-fmt.Println(y[1]) // 0
+println(y[1]) // 0
 
 // 直接赋值
 elements := map[string]string{
 	"H":  "Hydrogen",
 	"He": "Helium",
 }
-fmt.Println(elements) // map[H:Hydrogen He:Helium]
+println(elements) // map[H:Hydrogen He:Helium]
 
 innerMap := map[string]map[string]string{
 	"H": map[string]string{
@@ -460,7 +460,7 @@ innerMap := map[string]map[string]string{
 		"state": "gas",
 	},
 }
-fmt.Println(innerMap) // map[H:map[name:Hydrogen state:gas] He:map[name:Helium state:gas]]
+println(innerMap) // map[H:map[name:Hydrogen state:gas] He:map[name:Helium state:gas]]
 ```
 
 ## 10. 函数 Functions
@@ -488,10 +488,10 @@ func sum(x ...int) int {
 }
 
 func main() {
-	fmt.Println(add(5, 2))       // 7
-	fmt.Println(sub(5, 2))       // 3
-	fmt.Println(addAndSub(5, 2)) // 7 3
-	fmt.Println(sum(1, 2, 3, 4)) // 10
+	println(add(5, 2))       // 7
+	println(sub(5, 2))       // 3
+	println(addAndSub(5, 2)) // 7 3
+	println(sum(1, 2, 3, 4)) // 10
 }
 ```
 
@@ -504,8 +504,8 @@ func main() {
 		x++
 		return x
 	}
-	fmt.Println(increment()) // 1
-	fmt.Println(increment()) // 2
+	println(increment()) // 1
+	println(increment()) // 2
 }
 ```
 
@@ -521,7 +521,7 @@ func factorial(x uint) uint {
 }
 
 func main() {
-	fmt.Println(factorial(5)) // 120
+	println(factorial(5)) // 120
 }
 ```
 
@@ -529,15 +529,15 @@ func main() {
 
 ```golang
 func first() {
-	fmt.Println("first")
+	println("first")
 }
 func last() {
-	fmt.Println("last")
+	println("last")
 }
 func main() {
 	defer last()
 	defer first()
-	fmt.Println("hello world")
+	println("hello world")
 }
 
 // hello world
@@ -553,7 +553,7 @@ func main() {
 func recoverPanic() {
 	defer func() {
 		r := recover()
-		fmt.Println("recover:", r)
+		println("recover:", r)
 	}()
 	panic("panic error")
 }
@@ -581,11 +581,11 @@ func resetZero(x *int) {
 func main() {
 	x := 5
 	toZero(x)
-	fmt.Println(x) // x is still 5
+	println(x) // x is still 5
 
 	// 通过&符号获取x变量的指针位置
 	resetZero(&x)
-	fmt.Println(x) // x is 0
+	println(x) // x is 0
 }
 ```
 
@@ -600,7 +600,7 @@ func main() {
 	// new 创建一个指定类型实例, 并返回其指针
 	xPtr := new(int)
 	one(xPtr)
-	fmt.Println(*xPtr) // x is 1
+	println(*xPtr) // x is 1
 }
 ```
 
@@ -620,11 +620,11 @@ type Employee struct {
 }
 
 func (e Employee) Work() {
-	fmt.Println(e.Name, "work")
+	println(e.Name, "work")
 }
 
 func (e *Employee) Rest() {
-	fmt.Println(e.Name, "rest")
+	println(e.Name, "rest")
 }
 
 func main() {
@@ -641,7 +641,7 @@ func main() {
 		Depart: researchCenter,
 	}
 
-	fmt.Println(wongoo.Name, wongoo.Depart.Name) // wongoo Research Center
+	println(wongoo.Name, wongoo.Depart.Name) // wongoo Research Center
 	wongoo.Work() // wongoo work
 	wongoo.Rest() // wongoo rest
 }
@@ -703,7 +703,7 @@ type Employee struct {
 }
 
 func (e Employee) Work() {
-	fmt.Println(e.Name, "work")
+	println(e.Name, "work")
 }
 
 type Developer struct {
@@ -713,7 +713,7 @@ type Developer struct {
 
 // 实现重写
 func (d Developer) Work() {
-	fmt.Println(d.Name, "work on projects", d.Projects)
+	println(d.Name, "work on projects", d.Projects)
 }
 
 type Worker interface {
@@ -836,7 +836,7 @@ func Sqrt(f float64) (float64, error) {
 // 调用方显示的判断错误并进行处理
 result, err:= Sqrt(-1)
 if err != nil {
-   fmt.Println(err)
+   println(err)
 }
 ```
 
@@ -869,11 +869,11 @@ import "pkg1"
 import "pkg2"
 
 func main(){
-	fmt.Println(pkg1.Hello())
-	// fmt.Println(pkg1.privateMethod()) // unexported 方法无法调用 (可以理解为private方法)
+	println(pkg1.Hello())
+	// println(pkg1.privateMethod()) // unexported 方法无法调用 (可以理解为private方法)
 
-	fmt.Println(pkg2.GlobalVariable)
-	// fmt.Println(pkg2.privateVariable) // unexported 变量无法访问 (可以理解为private变量)
+	println(pkg2.GlobalVariable)
+	// println(pkg2.privateVariable) // unexported 变量无法访问 (可以理解为private变量)
 }
 ```
 
@@ -882,11 +882,11 @@ func main(){
 package pkg1
 
 func Hello(){
-	fmt.Println("hello")
+	println("hello")
 }
 
 func privateMethod(){
-	fmt.Println("private")
+	println("private")
 }
 ```
 
@@ -1008,7 +1008,7 @@ func readFile() {
 		return
 	}
 	str := string(bs)
-	fmt.Println(str)
+	println(str)
 }
 ```
 
@@ -1361,7 +1361,7 @@ type Person struct {
 wongoo := Person{Name: "wongoo", Sex: 1}
 
 typ := reflect.TypeOf(wongoo)       // 获取结构体实例的反射类型对象
-fmt.Println(typ.Name(), typ.Kind()) // Person struct
+println(typ.Name(), typ.Kind()) // Person struct
 
 // 遍历结构体所有成员
 for i := 0; i < typ.NumField(); i++ {
@@ -1372,16 +1372,16 @@ for i := 0; i < typ.NumField(); i++ {
 	// name: Type  tag: 'json:"type" id:"100"'
 }
 
-fmt.Println(wongoo) // {wongoo 1}
+println(wongoo) // {wongoo 1}
 
 value := reflect.Indirect(reflect.ValueOf(&wongoo)) // 反射获取实例值对象
 nameValue := value.FieldByName("Name")              // 获取实例字段的值对象
 
 name := nameValue.Interface() // 通过反射获得变量值
-fmt.Println(name)             // wongoo
+println(name)             // wongoo
 
 nameValue.SetString("Yang") // 反射修改变量值
-fmt.Println(wongoo)         // {Yang 1}
+println(wongoo)         // {Yang 1}
 ```
 
 也可以运行时创建动态函数，实现类似代理的效果:
@@ -1411,7 +1411,7 @@ func main() {
 
 	result := results[0].String()
 
-	fmt.Println(result) // 200: ok
+	println(result) // 200: ok
 }
 ```
 
