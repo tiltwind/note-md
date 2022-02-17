@@ -50,8 +50,8 @@ Go以囊地鼠（Gopher）作为它的吉祥物，go语言开发者也自称为g
 
 参考: 
 1. [Go维基百科](https://zh.wikipedia.org/wiki/Go)
-2. [三分钟了解Go语言的前世今生](https://juejin.cn/post/6844903808183566344)
-3. [《The Way to Go》中文译本](https://github.com/unknwon/the-way-to-go_ZH_CN)
+2. [《The Way to Go》中文译本](https://github.com/unknwon/the-way-to-go_ZH_CN)
+3. [三分钟了解Go语言的前世今生](https://juejin.cn/post/6844903808183566344)
 
 
 ## 2. Go 安装
@@ -103,6 +103,7 @@ go version
 参考:
 1. [golang versions](https://github.com/golang/go/tags)
 
+
 ## 3. Hello World 范例
 
 Go 语言的基础组成有以下几个部分：
@@ -117,13 +118,14 @@ Go 语言的基础组成有以下几个部分：
 Hello World 范例:
 
 ```golang
-// main.go
+// this is main package
 package main
 
 import "fmt"
 
+// main func
 func main() {
-    fmt.Println("Hello, World")
+    fmt.Println("Hello, " + "World")
 }
 ```
 
@@ -193,6 +195,7 @@ append	bool	byte	cap	close	complex	complex64	complex128	uint16
 copy	false	float32	float64	imag	int	int8	int16	uint32
 int32	int64	iota	len	make	new	nil	panic	uint64
 print	println	real	recover	string	true	uint	uint8	uintptr
+any
 ```
 
 **标识符**: 一个或是多个字母(`A~Z` 和 `a~z`) 数字(`0~9`)、下划线`_`组成的序列，但是第一个字符必须是字母或下划线而不能是数字。
@@ -245,6 +248,10 @@ print	println	real	recover	string	true	uint	uint8	uintptr
 
 ## 7. Golang 变量
 
+Go命名规则: 名字必须以一个字母（Unicode字母）或下划线开头，后面可以跟任意数量的字母、数字或下划线。 
+大写字母和小写字母是不同的：heapSort和Heapsort是两个不同的名字。
+
+变量命名一般采用驼峰式，当遇到特有名词（缩写或简称，如 DNS,URL,HTML）的时候，特有名词根据是否私有全部大写或小写。
 
 ### 7.1. 变量定义
 ```golang
@@ -597,7 +604,7 @@ func main() {
 }
 ```
 
-### 12. 结构体 struct
+## 12. 结构体 struct
 
 ```golang
 
@@ -644,6 +651,8 @@ func main() {
 
 Go中无需显示的生命一个 type 实现了某一个接口，只要指定type拥有某个接口所有相同签名的方法，则这个类型会被当做这个接口的实现。
 
+> 注意: 如果一个接口增加了方法，则其所有实现也要同时增加该方法才会被认为实现了该接口。
+
 ```golang
 type Worker interface {
 	Work()
@@ -668,6 +677,21 @@ func main() {
 	teamWork(wongoo, eric)
 	// wongoo work
 	// eric work
+}
+```
+
+**接口命名规范**: 接口名一般用名词，可以是`动词+er`的形式。
+```golang
+type Car interface {
+    Start() 
+    Stop()
+    Drive()
+}
+type Reader interface {
+    Read(p []byte) (n int, err error)
+}
+type Writer interface {
+	Write(p []byte) (n int, err error)
 }
 ```
 
@@ -711,9 +735,83 @@ func main() {
 }
 ```
 
-> Go中无类似java中的重载, 不能包含方法名一致但参数签名不一致的方法。
+> 注意: Go中无类似java中的重载, 不能包含方法名一致但参数签名不一致的方法。
 
-## 15. Go 错误处理
+接口也可以继承:
+```golang
+type Person interface {
+	Name() string
+}
+
+type Worker interface {
+	Person // 继承Person接口
+	Work()
+}
+```
+
+## 15. 泛型
+
+Go 因为一开始不支持泛型而被吐槽，但从 v1.18 版本开始可以使用泛型了。
+
+```golang
+// 在函数名后通过中括号定义类型约束，此处是类型列表
+func add[T int | int32 | int64 | float32 | float64](a T, b T) T {
+	return a + b
+}
+
+func sub[T int | int32 | int64 | float32 | float64](a T, b T) T {
+	return a - b
+}
+
+func main() {
+	println(add(5, 2))
+	println(add(1.5, 1.2))
+	println(sub(5, 2))
+	println(sub(1.5, 1.2))
+}
+
+// 7
+// +2.700000e+000
+// 3
+// +3.000000e-001
+```
+
+如果支持的类型多个函数都会用到，可以定义一个类型约束接口来简化代码：
+
+```golang
+// 声明一个类型约束接口
+type Number interface {
+	int|int32|int64|float32|float64
+}
+
+// 在函数名后通过中括号定义类型约束，此处是接口类型
+func add[T Number](a T, b T) T {
+	return a + b
+}
+
+func sub[T Number](a T, b T) T {
+	return a - b
+}
+
+func main() {
+	println(add(5, 2))
+	println(add(1.5, 1.2))
+	println(sub(5, 2))
+	println(sub(1.5, 1.2))
+}
+
+// 7
+// +2.700000e+000
+// 3
+// +3.000000e-001
+```
+
+除了 `类型列表`、`接口`， **类型约束** 还可以是关键字 `any`, `comparable`.
+
+> 说明: Go 泛型并不是运行时判断, 只是编译器在前端(词法分析、语法分析、语义分析)编译阶段，将泛型编译为代码中所有类型的具体函数。
+
+
+## 16. Go 错误处理
 
 Go 语言通过内置的错误接口提供了非常简单的错误处理机制。
 
@@ -742,11 +840,17 @@ if err != nil {
 }
 ```
 
-## 16. Go 包
+## 17. Go包
 
-Go 中的包用于隔离封装隔离代码模块逻辑，并控制对外开放接口。
+Go 中的包用于隔离封装隔离代码模块逻辑，并控制对外可见性。
+以大写字母开头的变量或函数对包外可见(exported)，小写字母开头的变量和函数则是私有的(unexported)，仅在同一个包内可以访问。
 
-文件夹结构:
+包名和文件命名规范:
+- 包名用小写,使用短命名,尽量和标准库不要冲突。
+- 文件命名一律采用小写，不用驼峰式，尽量见名思义，看见文件名就可以知道这个文件下的大概内容。
+
+
+例如如下文件夹结构:
 ```
 .
 ├── main.go
@@ -793,11 +897,44 @@ var GlobalVariable = "exported var"
 var privateVariable = "unexported var"
 ```
 
-## 17. Golang 核心包
+### 17.1. 包初始化函数
 
-参考: https://github.com/golang/go/tree/master/src
+`init()` 函数用于 程序运行前 的进行包初始化（自定义变量、实例化通信连接）工作.
 
-### 17.1. strings 包
+```golang
+func init()  {
+	println("init() 1")
+}
+
+func init()  {
+	println("init() 2")
+}
+
+func main() {
+	println("main()")
+}
+
+// init() 1
+// init() 2
+// main()
+```
+
+
+`init()`函数特性:
+- 每个包、每个程序文件 可以同时拥有多个 `init()`，**但不建议**
+- 同一个包、文件中多个 `init()` 执行顺序, Golang 中并未明确
+- 不同包的 `init()` 执行顺序，按照 **导入包的依赖关系** 决定, 被导入包的 `init()` 会优先执行
+- `init()` 不能被其他函数调用，而自动 **在main函数执行前** 被调用
+- 执行顺序总结： import –> const –> var –> init() –> main()
+
+
+
+## 18. Golang 核心包
+
+Go包括诸多核心包，具体可以参考: https://github.com/golang/go/tree/master/src .
+下面列举结构常用包的一些用法。
+
+### 18.1. strings 包
 
 ```golang
 strings.ToLower("TEST")               // "test"
@@ -817,7 +954,7 @@ str := string([]byte{'t','e','s','t'}) // 字节数组转字符串
 ```
 
 
-### 17.2. io 包
+### 18.2. io 包
 
 io 包 定义了基本的两个接口 `Reader` 和 `Writer`, 
 ```golang
@@ -840,7 +977,7 @@ func ReadFull(r Reader, buf []byte) (n int, err error)
 func WriteString(w Writer, s string) (n int, err error)
 ```
 
-### 17.3. os包
+### 18.3. os包
 
 **文件读写**:
 ```golang
@@ -866,7 +1003,7 @@ func readFile() {
 ```
 
 
-## 18. Go 测试
+## 19. Go 测试
 
 Go 测试代码会单独放到以 `_test` 结尾的测试文件中。
 
@@ -925,7 +1062,7 @@ go test -v
 # ok      github.com/wongoo/gdemo/temp    0.008s 
 ```
 
-## 19. Go 模块管理
+## 20. Go 模块管理
 
 ```bash
 # 初始化项目模块
@@ -962,15 +1099,15 @@ gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c h1:dUUwHk2QECo/6vqA44rthZ8ie
 gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
 ```
 
-依赖包默认会从官方的仓库下载, 可能会比较慢，可以通过创建[私有go proxy](https://wongoo.github.io/note/go/go-proxy.html)提升速度。
+依赖模块默认会从官方的仓库下载, 可能会比较慢，可以通过创建[私有go proxy](https://wongoo.github.io/note/go/go-proxy.html)提升速度。
 
 
-## 20. Go 并发
+## 21. Go 并发
 
 
-### 20.1. 协程 goroutine
+### 21.1. 协程 goroutine
 
-不同于操作系统级别的线程Thread, Go语言提供轻量级的用户级线程 —— 协程(goroutine), 可以支持上百万级的协程调度。
+不同于操作系统级别的线程Thread, Go语言提供轻量级的语言级线程 —— 协程(goroutine), 可以支持上百万级的协程调度。
 
 启动goroutine:
 ```golang
@@ -980,9 +1117,9 @@ go func() {
 }()
 ```
 
-协程启动后将有Go Runtime去调度异步执行。
+协程启动后将有Go调度器去调度异步执行。
 
-### 20.2. GMP模型
+### 21.2. GMP模型
 
 GMP是 Groutine、Machine、Processor的缩写，是Go调度器的核心:
 - G : Groutine 协程
@@ -1023,10 +1160,10 @@ GMP是 Groutine、Machine、Processor的缩写，是Go调度器的核心:
 - [GMP模型里为什么要有P？](https://cloud.tencent.com/developer/article/1828822)
 
 
-### 20.3. 锁
+### 21.3. 锁
 
 
-#### 20.3.1. sync.Mutex 互斥锁
+#### 21.3.1. sync.Mutex 互斥锁
 
 ```golang
 var l sync.Mutex
@@ -1048,11 +1185,11 @@ func main() {
 	l.Lock()
 
 	// 确保能正常打印 hello world
-	print(a)
+	println(a)
 }
 ```
 
-#### 20.3.2. sync.RWMutex 读写锁
+#### 21.3.2. sync.RWMutex 读写锁
 
 读锁和写锁互斥, 读锁和读锁可以并存。
 
@@ -1065,7 +1202,7 @@ func w() {
 	l.Lock()
 	defer l.Unlock()
 
-	print("incr\n")
+	println("incr")
 	atomic.AddInt32(&a, 1)
 }
 
@@ -1074,7 +1211,7 @@ func r() {
 	l.RLock()
 	defer l.RUnlock()
 
-	print(atomic.LoadInt32(&a), "\n")
+	println(atomic.LoadInt32(&a))
 }
 
 func main() {
@@ -1103,8 +1240,11 @@ func main() {
 > 注意: go中对开发人员无线程的概念，也不提供协程的id，没有可重入锁，同一个协程中重复请求锁将发生死锁错误。
 
 
-### 20.4. 通道Channel
+### 21.4. 通道Channel
 
+Channel 是 Golang 在语言级别提供的 goroutine 之间的通信方式，可以使用 channel 在两个或多个 goroutine 之间传递消息。
+
+Channel 是类型相关的，也就是说，一个 channel 只能传递一种类型的值，这个类型需要在声明 channel 时指定。
 
 **非缓冲通道**:
 ```golang
@@ -1124,17 +1264,18 @@ func main() {
 
 	// 阻塞等待通道消息
 	r := <-c
-	print(r, "\n")
+	println(r)
 
 	// 接收到通道消息时, a已被赋值
-	print(a)
+	println(a)
 }
 
 // ok
 // hello, world
 ```
 
-**缓冲通道**:
+**缓冲通道**: 
+
 ```golang
 
 // 创建通道
@@ -1145,12 +1286,12 @@ func producer() {
 	i := atomic.AddInt32(&a, 1)
 	// 向通道发送消息
 	c <- i
-	print("produce ", i, "\n")
+	println("produce ", i)
 }
 func consumer() {
 	for i := 0; i < 4; i++ {
 		// 消费通道消息
-		print("consume ", <-c, "\n")
+		println("consume ", <-c)
 	}
 }
 
@@ -1185,8 +1326,19 @@ func main() {
 - [Go内存模型](go-memory-model.html)
 
 
+### 20.1. select 语法
 
-## 21. Go 反射
+select 的语法与 switch 的语法非常相似，由 select 开始一个新的选择块，每个选择条件有 case 语句来描述。
+其大致的结构如下：
+```golang
+select {
+    case <-chan1:       // 如果 chan1 成功读取到数据，则执行该 case 语句
+    case chan2 <- 1:    // 如果成功向 chan2 写入数据，则执行该 case 语句
+    default:            // 如果上面的条件都没有成功，则执行 default 流程
+}
+```
+
+## 22. Go 反射
 
 go语言也支持反射，可在运行时更新和检查变量的值、调用变量的方法和变量支持的内在操作。
 
@@ -1222,7 +1374,7 @@ nameValue.SetString("Yang") // 反射修改变量值
 fmt.Println(wongoo)         // {Yang 1}
 ```
 
-也可以创建运行时动态函数，实现类似代理的效果:
+也可以运行时创建动态函数，实现类似代理的效果:
 ```golang
 // Joiner 定义一个方法类型
 type Joiner func(i int, a string) string
@@ -1254,8 +1406,7 @@ func main() {
 ```
 
 
-
-## 22. Go GC
+## 23. Go GC
 
 Go GC算法基本特征：
 - 非分代
@@ -1286,7 +1437,8 @@ Go采用三色标记和写屏障：
 - [Latency Problem Solved Go GC - Talks](http://talks.golang.org/2015/go-gc.pdf)
 - [Go GC算法](go-gc.html)
 
-## 23. Go 和 Java 性能对比
+
+## 24. Go 和 Java 性能对比
 
 一般情况下 Go 程序相比Java程序在资源利用率上更好，特别是内存利用率上。
 
@@ -1304,7 +1456,8 @@ CPU利用率:
 
 
 # A. 编辑历史
-1. 2022-02-16, wangoo, 初版
+1. 2022-02-17, wangoo, 增加泛型、select用法、包初始化函数
+2. 2022-02-16, wangoo, 初版
 
 
 
