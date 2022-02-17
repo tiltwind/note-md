@@ -1,7 +1,7 @@
 <!---
 markmeta_title: golang性能分析工具pprof
-markmeta_author: 望哥
-markmeta_date: 2018-09-26 21:41:42
+markmeta_author: wongoo
+markmeta_date: 2018-09-26
 markmeta_tags: golang,pprof,performance
 markmeta_categories: 编程语言
 -->
