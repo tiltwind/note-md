@@ -10,14 +10,15 @@ markmeta_tags: golang,installation
 
 Mac:
 ```bash
-curl -C - -O https://dl.google.com/go/go1.18beta2.darwin-amd64.tar.gz
-sudo tar -C /usr/local -xzf go1.18beta2.darwin-amd64.tar.gz
+curl -C - -O https://dl.google.com/go/go1.18.2.darwin-amd64.tar.gz
+sudo tar -C /usr/local -xzf go1.18.2.darwin-amd64.tar.gz
 ```
 
 Linux:
 ```bash
-curl -C - -O https://dl.google.com/go/go1.18beta2.linux-amd64.tar.gz
-sudo tar -C /usr/local -xzf go1.18beta2.linux-amd64.tar.gz
+curl -C - -O https://dl.google.com/go/go1.18.2.linux-amd64.tar.gz
+sudo tar -C /usr/local -xzf go1.18.2.linux-amd64.tar.gz
+sudo tar -C /tmp/go/local -xzf go1.18.2.linux-amd64.tar.gz
 ```
 
 config env:
@@ -46,8 +47,8 @@ sudo rm -rf /usr/local/go
 
 Install from source:
 ```bash
-curl -C - -O https://dl.google.com/go/go1.18beta2.src.tar.gz
-tar -C /usr/local -xzf go1.18beta2.src.tar.gz
+curl -C - -O https://dl.google.com/go/go1.18.2.src.tar.gz
+tar -C /usr/local -xzf go1.18.2.src.tar.gz
 cd /usr/local/go/src
 time sudo ./make.bash
 ```

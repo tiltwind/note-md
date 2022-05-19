@@ -62,14 +62,14 @@ Go以囊地鼠（Gopher）作为它的吉祥物，go语言开发者也自称为g
 
 Mac环境安装:
 ```bash
-curl -C - -O https://dl.google.com/go/go1.17.6.darwin-amd64.tar.gz
-sudo tar -C /usr/local -xzf go1.17.6.darwin-amd64.tar.gz
+curl -C - -O https://dl.google.com/go/go1.18.2.darwin-amd64.tar.gz
+sudo tar -C /usr/local -xzf go1.18.2.darwin-amd64.tar.gz
 ```
 
 Linux环境安装:
 ```bash
-curl -C - -O https://dl.google.com/go/go1.17.6.linux-amd64.tar.gz
-sudo tar -C /usr/local -xzf go1.17.6.linux-amd64.tar.gz
+curl -C - -O https://dl.google.com/go/go1.18.2.linux-amd64.tar.gz
+sudo tar -C /usr/local -xzf go1.18.2.linux-amd64.tar.gz
 ```
 
 配置环境变量:
@@ -90,15 +90,16 @@ export GOPRIVATE=gitlab.mycompany.com
 
 升级: 
 ```bash
+# 1. 删除旧版本
 sudo rm -rf /usr/local/go
-# then install the latest
+# 2. 按照上面方式下载最新版本安装
 ```
 
 检查安装情况:
 
 ```bash
 go version
-# go version go1.17.6 darwin/amd64
+# go version go1.18.2 darwin/amd64
 ```
 
 
@@ -127,7 +128,7 @@ import "fmt"
 
 // main func
 func main() {
-    println("Hello, " + "World")
+    fmt.Println("Hello, " + "World")
 }
 ```
 
@@ -1470,9 +1471,8 @@ CPU利用率:
 
 
 # A. 编辑历史
-1. 2022-02-17, wangoo, 增加泛型、select用法、内部包 internal、包初始化函数
-2. 2022-02-16, wangoo, 初版
-
-
+1. 2022-02-16, wongoo, 初版
+2. 2022-02-17, wongoo, 增加泛型、select用法、内部包 internal、包初始化函数
+3. 2022-05-19, wongoo, 升级go版本号, helloworld 例子修改
 
 
