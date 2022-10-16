@@ -1,5 +1,6 @@
 # .
 
+- [think](think)
 - [retrospect](retrospect)
 - [okr](okr)
 - [mq](mq)

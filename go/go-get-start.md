@@ -756,6 +756,25 @@ type Worker interface {
 
 Go 因为一开始不支持泛型而被吐槽，但从 v1.18 版本开始可以使用泛型了。
 
+
+泛型结构体:
+```golang
+// 定义一个泛型结构体
+type BaseResponse[T any] struct{
+	Code int
+	Msg  string
+	Data T
+}
+
+// 实例指定具体泛型类型
+resp := &BaseResponse[string]{
+	Code: 200,
+	Msg:  "ok",
+	Data: "this is data",
+}
+```
+
+泛型函数:
 ```golang
 // 在函数名后通过中括号定义类型约束，此处是类型列表
 func add[T int | int32 | int64 | float32 | float64](a T, b T) T {
@@ -772,7 +791,6 @@ func main() {
 	println(sub(5, 2))
 	println(sub(1.5, 1.2))
 }
-
 // 7
 // +2.700000e+000
 // 3

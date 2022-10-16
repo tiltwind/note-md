@@ -10,15 +10,15 @@ markmeta_tags: golang,installation
 
 Mac:
 ```bash
-curl -C - -O https://dl.google.com/go/go1.18.2.darwin-amd64.tar.gz
-sudo tar -C /usr/local -xzf go1.18.2.darwin-amd64.tar.gz
+curl -C - -O https://dl.google.com/go/go1.19.darwin-amd64.tar.gz
+sudo tar -C /usr/local -xzf go1.19.darwin-amd64.tar.gz
 ```
 
 Linux:
 ```bash
-curl -C - -O https://dl.google.com/go/go1.18.2.linux-amd64.tar.gz
-sudo tar -C /usr/local -xzf go1.18.2.linux-amd64.tar.gz
-sudo tar -C /tmp/go/local -xzf go1.18.2.linux-amd64.tar.gz
+curl -C - -O https://dl.google.com/go/go1.19.linux-amd64.tar.gz
+sudo tar -C /usr/local -xzf go1.19.linux-amd64.tar.gz
+sudo tar -C /tmp/go/local -xzf go1.19.linux-amd64.tar.gz
 ```
 
 config env:
@@ -47,8 +47,8 @@ sudo rm -rf /usr/local/go
 
 Install from source:
 ```bash
-curl -C - -O https://dl.google.com/go/go1.18.2.src.tar.gz
-tar -C /usr/local -xzf go1.18.2.src.tar.gz
+curl -C - -O https://dl.google.com/go/go1.19.src.tar.gz
+tar -C /usr/local -xzf go1.19.src.tar.gz
 cd /usr/local/go/src
 time sudo ./make.bash
 ```
@@ -58,14 +58,14 @@ time sudo ./make.bash
 
 ```bash
 # golang tools
-cd $GOPATH/src/github.com/golang/tools && git pull -v && go install ./...
-# go install golang.org/x/tools/cmd/...@latest
+# cd $GOPATH/src/github.com/golang/tools && git pull -v && go install ./...
+go install golang.org/x/tools/cmd/...@latest
 
 
 # golangci-lint
 # cd $GOPATH/src/github.com/golangci/golangci-lint && git pull -v && go install ./...
-# go install github.com/golangci/golangci-lint/...@latest
-curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
+# curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
+go install github.com/golangci/golangci-lint/...@latest
 
 go install mvdan.cc/gofumpt@latest
 ```
