@@ -16,17 +16,17 @@ markmeta_author: tiltwind
 - `P(A|B)` : 指在事件B发生的情况下，事件A发生的概率；
 - `P(AB)` : 同时发生事件A和B的概率, 有的记为`P(A∩B)`；
 
-![](imagesbayes/bayes_wenn.jpg)
+![](images/bayes/bayes_wenn.jpg)
 
 根据文氏图，可以很清楚地看到在事件B发生的情况下，事件A发生的概率就是P(AB)除以P(B)。
 
-![](imagesbayes/bayes_wenn_divide.png)
+![](images/bayes/bayes_wenn_divide.png)
 
 因此: `P(AB) = P(B)P(A|B)` ，同理: `P(AB) = P(A)P(B|A)`
 
 这就是**乘法公式** :
 
-![](imagesbayes/bayes_multiplication.png)
+![](images/bayes/bayes_multiplication.png)
 
 > 乘法公式的推广: 对于任何正整数`n≥2` ，当 `P(A1A2...An-1) > 0` 时，有：
 `P(A1A2...An-1An)=P(A1)P(A2|A1)P(A3|A1A2)...P(An|A1A2...An-1)`
@@ -35,11 +35,11 @@ markmeta_author: tiltwind
 
 **即可以得到条件概率公式:**
 
-![](imagesbayes/bayes_conditional_formula.png)
+![](images/bayes/bayes_conditional_formula.png)
 
 **设互斥事件 `A1,A2,...An` 是样本空间Ω (Omega)的一个划分，B为任一事件，则广义的条件概率公式为：**
 
-![](imagesbayes/bayes_conditional_formula_pub.png)
+![](images/bayes/bayes_conditional_formula_pub.png)
 
 
 ## 1.2 全概率公式(Formula of Total Probability)
@@ -52,14 +52,14 @@ markmeta_author: tiltwind
 
 从而得到**全概率公式**:
 
-![](imagesbayes/bayes_total_formula.png)
+![](images/bayes/bayes_total_formula.png)
 
 **全概率公式的含义是，如果A和A'构成样本空间的一个划分，那么事件B的概率，就等于A和A'的概率分别乘以B对这两个事件的条件概率之和。**
 
 
 **设互斥事件 `A1,A2,..An` 是样本空间Ω的一个划分，B为任一事件，则广义全概率公式为：**
 
-![](imagesbayes/bayes_total_formula_pub.png)
+![](images/bayes/bayes_total_formula_pub.png)
 
 **全概率公式的意义在于，当直接计算P(B)较为困难,而P(Ai),P(B|Ai)  (i=1,2,...n)的计算较为简单时，可以利用全概率公式计算P(B)。思想就是，将事件B分解成几个小事件，通过求小事件的概率，然后相加从而求得事件B的概率。**
 
@@ -73,11 +73,11 @@ markmeta_author: tiltwind
 
 **根据条件概率公式和全概率公式可以导出贝叶斯公式:**
 
-![](imagesbayes/bayes_formula.png)
+![](images/bayes/bayes_formula.png)
 
 **设互斥事件 `A1,A2,...An` 是样本空间Ω的一个划分，B为任一事件，则广义贝叶斯公式为：**
 
-![](imagesbayes/bayes_formula_pub.png)
+![](images/bayes/bayes_formula_pub.png)
 
 > 实例：发报台分别以概率0.6和0.4发出信号“∪”和“—”。由于通信系统受到干扰，当发出信号“∪”时，收报台分别以概率0.8和0.2受到信号“∪”和“—”；又当发出信号“—”时，收报台分别以概率0.9和0.1收到信号“—”和“∪”。求当收报台收到信号“∪”时，发报台确系发出“∪”的概率。解：P(A1|B）= (0.6 * 0.8)/(0.6 * 0.8 + 0.4 * 0.1) = 0.923
 
@@ -87,7 +87,7 @@ markmeta_author: tiltwind
 
 对条件 概率公式 进行变形，可以得到如下形式：
 
-![](imagesbayes/bayes_inference_formula.png)
+![](images/bayes/bayes_inference_formula.png)
 
 - `A` 被视为导致事件B发生的"原因";
 - `P(A)` 称为**先验概率（Prior probability）**，即在B事件发生之前，我们对A事件概率的一个判断;
@@ -114,7 +114,7 @@ markmeta_author: tiltwind
 如果用X来表示摸出的球是黑色的，现在实际上要求后验概率 P(A|X) 和 P(B|X)的概率。
 根据贝叶斯公式:
 
-![](imagesbayes/bayes_formula_example.png)
+![](images/bayes/bayes_formula_example.png)
 
 根据已知壶里的球的数量可知， P(X|A) = 0.1 , P(X|B) = 0.8 .
 
