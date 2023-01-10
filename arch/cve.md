@@ -152,8 +152,13 @@ maven插件下载的漏洞数据库位置是 `~/.m2/repository/org/owasp/depende
 执行命令:
 ```bash
 # 聚合检查maven项目(包括子项目), 输出json格式, 输出到制定目录下, 输出文件名为 dependency-check-report.json
-mvn dependency-check:aggregate -DretireJsAnalyzerEnabled=false -Dformat=JSON -DprettyPrint=true -Dodc.outputDirectory=/Users/gelnyang/temp
+mvn dependency-check:aggregate \
+	-DretireJsAnalyzerEnabled=false \
+	-Dformat=JSON -DprettyPrint=true \
+	-Dodc.outputDirectory=/Users/gelnyang/temp
 ```
+
+> maven 插件参数说明: https://jeremylong.github.io/DependencyCheck/dependency-check-maven/configuration.html
 
 输出的JSON数据格式:
 ```JSON
