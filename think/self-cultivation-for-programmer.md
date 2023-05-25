@@ -52,6 +52,27 @@ markmeta_tags: think
 要写出正确的程序也并不容易，需要学习了解公司的业务，需要
 
 
+## 3. 对代码精益求精的态度
+
+
+
+```java
+// 20230113
+long delay = spu.getAddedTime().getTime() - new Date().getTime() < 0 ? 0 :
+                spu.getAddedTime().getTime() - new Date().getTime();
+
+// Problems:
+// 1. the delay value may be negative
+// 2. depulicated code
+// 
+// should change to: 
+
+long delay = spu.getAddedTime().getTime() - new Date().getTime();
+if ( delay < 0 ) { 
+	delay = 0 
+}
+```
+
 
 
 ## A. 参考
