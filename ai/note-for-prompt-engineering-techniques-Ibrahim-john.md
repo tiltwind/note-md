@@ -321,7 +321,6 @@ used to fine-tune a pre-trained model or to train a new model for specific tasks
 
 
 
-
 ## A. Reference
 
-- Examples and guides for using the OpenAI API, https://github.com/openai/openai-cookbook
+- [Art of Asking ChatGPT for High-Quality Answ Engineering Techniques, The - Ibrahim John.pdf](https://bing.com/search?q=The%20Art%20of%20Asking%20ChatGPT%20for%20High-Quality%20Answers%20pdf)
