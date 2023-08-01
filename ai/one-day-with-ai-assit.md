@@ -8,40 +8,19 @@ markmeta_tags: ai,prompt-engineering
 
 # 我与AI助理的一天
 
-
 - 07:00 [早餐 - 营养专家建议](prompts-cooking-menu)
 - 08:00 [新闻阅读 - 国际关系分析](prompts-international-relations-analysis)
 - 09:00 [会议信息总结](prompts-meeting-summary-project-system)
 - 09:30 [营销大师](prompts-market-master)
 - 10:00 [生成考试题目](prompts-generate-exam)
 - 10:30 喝杯咖啡去吧
-- 11:00 [代码生成-360数据分析](prompts-code-gen-csv)
-- 14:00 [系统设计——经营竞赛系统](prompts-system-design-3a-v2)
-
-
-## 草稿 TODO
-
-
-09:30 作为保洁师提供保洁服务：AI，如何确定最佳的保洁频率和清洁重点？
-10:30 作为站长协调一线服务人员：AI，如何提高站点服务质量和效率？
-11:00 作为管家和客户沟通：AI，如何更好地满足客户需求，提高客户满意度？
-11:30 作为市场营销主管策划营销方案：AI，如何确定目标客户群体和营销策略？
-
-12:00 午餐：AI，这个食物的营养构成如何？我应该搭配什么食物来平衡饮食？
-12:30 下午工作：AI，如何保持精力充沛并提高工作效率？
-13:30 作为HR发展人才：AI，如何招聘和培养高素质的员工？
-14:30 作为程序员开发程序：AI，如何调试代码和提高程序效率？
-15:00 作为管理者做团队绩效分析：AI，如何激励员工和提高团队绩效？
-16:00 作为财务计算财务报表：AI，如何进行税务优化和风险管理？
-17:00 健身：AI，我的运动效果如何？我应该如何制定个性化的健身计划？
-18:00 晚餐：AI，这个食物的烹饪时间和温度是多少？我需要准备哪些调料和配菜？
-19:00 家庭聚餐：AI，如何更好地与家人沟通，提高家庭关系？
-20:00 学习：AI，这个知识点和哪些其他知识点有关联？我应该如何制定有效的学习计划？
-20:00 购物（24:00）：AI，这个商品是否有优惠活动？我需要根据什么因素来选择购买它？
-20:30 休闲娱乐：AI，如何更好地享受电影或者音乐等娱乐活动？
-21:00 睡前：AI，我的睡眠质量如何？我应该如何改善睡眠环境并保持良好的作息习惯？
-
-
-
-## A. Reference
+- 11:00 [客户评价分析](prompts-customer-evaluation-analysis)
+- 12:00 该吃午饭了
+- 14:00 [项目作战室](prompts-agile-war-room)
+- 15:00 [活动安全](prompts-activity-security)
+- 16:00 [代码生成-360数据分析](prompts-code-gen-csv)
+- 17:00 [系统设计——经营竞赛系统](prompts-system-design-3a-v2)
+- 18:00 [作诗](prompts-write-poem)
+- 20:00 [辅导数学作业](prompts-math-of-primary-school-1)
+- 21:00 [提示词原则](prompts-prompt-principles)
 
