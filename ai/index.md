@@ -2,6 +2,7 @@
 
 - 2023-07-31, [AI提示词 —— 项目作战室](prompts-agile-war-room.html), titlwind
 - 2023-07-31, [AI提示词 —— 活动安全](prompts-activity-security.html), titlwind
+- 2023-07-31, [AI提示词 —— 小学数学（苏格拉底教学法）](prompts-math-of-primary-school-socrates-method.html), titlwind
 - 2023-07-31, [AI提示词 —— 小学数学](prompts-math-of-primary-school-1.html), titlwind
 - 2023-07-06, [我与AI助理的一天](one-day-with-ai-assit.html), titlwind
 - 2023-07-06, [AI提示词 —— 营销大师](prompts-market-master.html), titlwind

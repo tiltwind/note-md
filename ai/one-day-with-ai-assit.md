@@ -22,5 +22,6 @@ markmeta_tags: ai,prompt-engineering
 - 17:00 [系统设计——经营竞赛系统](prompts-system-design-3a-v2)
 - 18:00 [作诗](prompts-write-poem)
 - 20:00 [辅导数学作业](prompts-math-of-primary-school-1)
+- 20:30 [辅导数学-苏格拉底教学法](prompts-math-of-primary-school-socrates-method)
 - 21:00 [提示词原则](prompts-prompt-principles)
 
