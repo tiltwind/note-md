@@ -1,5 +1,6 @@
 # ai
 
+- 2023-09-16, [AI提示词 —— 代码生成（redis task queue）](prompts-code-gen-redis-queue.html), titlwind
 - 2023-07-31, [AI提示词 —— 项目作战室](prompts-agile-war-room.html), titlwind
 - 2023-07-31, [AI提示词 —— 活动安全](prompts-activity-security.html), titlwind
 - 2023-07-31, [AI提示词 —— 小学数学（苏格拉底教学法）](prompts-math-of-primary-school-socrates-method.html), titlwind
