@@ -771,6 +771,7 @@ def f(pos1, pos2, /, pos_or_kwd, *, kwd1, kwd2):
         |                                - Keyword only
          -- Positional only
 ```
+
 - 仅位置参数: 应放在 `/` （正斜杠）前
 - 仅限关键字参数: 应在参数列表中第一个 仅限关键字 形参前添加 `*`。
 
@@ -787,6 +788,7 @@ def kwd_only_arg(*, arg):
 def combined_example(pos_only, /, standard, *, kwd_only):
     print(pos_only, standard, kwd_only)
 ```
+
 说明:
 - 使用仅限位置形参，可以让用户无法使用形参名。形参名没有实际意义时，强制调用函数的实参顺序时，或同时接收位置形参和关键字时，这种方式很有用。
 - 当形参名有实际意义，且显式名称可以让函数定义更易理解时，阻止用户依赖传递实参的位置时，才使用关键字。
@@ -1104,6 +1106,7 @@ main4.py 文件:
 - 第4行是一个字符串，表示模块的文档注释，任何模块代码的第一个字符串都被视为模块的文档注释；
 - 第6行使用 `__author__` 变量把作者写进去，这样当你公开源代码后别人就可以瞻仰你的大名；
 - 当在命令行运行模块文件时，Python解释器把一个特殊变量`__name__`置为`__main__`.
+
 ```python
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
@@ -1165,6 +1168,7 @@ Python 在两种情况下不检查缓存。
 
 
 - 必须要有 `__init__.py` 文件才能让 Python 将包含该文件的目录当作包来处理. `__init__.py` 可以只是一个空文件
+
 ```
 sound/                          Top-level package
       __init__.py               Initialize the sound package
@@ -1193,6 +1197,7 @@ sound/                          Top-level package
 ```
 
 引用说明:
+
 ```python
 # 这将加载子模块 sound.effects.echo。 它必须通过其全名来引用。
 import sound.effects.echo
@@ -1284,6 +1289,7 @@ print('END')
 
 
 还可以再次将异常抛出:
+
 ```python
 try:
     # ...
@@ -1309,7 +1315,9 @@ def main():
 
 main()
 ```
+
 执行，结果如下：
+
 ```
 $ python3 err.py
 Traceback (most recent call last):           <------  错误的跟踪信息
@@ -1576,6 +1584,7 @@ s.score = 9999
 ### 14.1. 文件读写
 
 文件读写都有可能产生IOError，一旦出错，后面的f.close()就不用调用。
+
 ```python
 try:
     f = open('/path/to/file', 'r', encoding='utf-8')
@@ -1586,6 +1595,7 @@ finally:
 ```
 
 Python引入了with语句来自动帮我们调用close()方法：
+
 ```python
 with open('/path/to/file', 'r') as f:
     print(f.read())
@@ -1598,6 +1608,7 @@ with open('/path/to/file', 'r') as f:
 `file-like Object`不要求从特定类继承，只要写个read()方法就行。
 
 写文件: 
+
 ```python
 with open('/Users/michael/test.txt', 'w') as f:
     f.write('Hello, world!')
@@ -1670,6 +1681,7 @@ if __name__=='__main__':
 
 
 创建多个异步子进程:
+
 ```python
 from multiprocessing import Pool
 import os, time, random
