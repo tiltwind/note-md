@@ -36,7 +36,7 @@ markmeta_tags: ai,vector,database
 ### 2.1. 向量加减法
 - **规则**：对应分量相加减。
 - **范例**：
-  ```python
+```python
   a = [1, 2, 3]
   b = [4, 5, 6]
   a + b = [1+4, 2+5, 3+6] = [5, 7, 9]
@@ -45,7 +45,7 @@ markmeta_tags: ai,vector,database
 ### 2.2. 标量乘法
 - **规则**：每个分量乘以标量。
 - **范例**：
-  ```python
+```python
   a = [2, -1]
   k = 3
   k*a = [6, -3]
@@ -53,12 +53,10 @@ markmeta_tags: ai,vector,database
 
 ### 2.3. 点积（内积）
 - **公式**：
-  \[
-  \mathbf{a} \cdot \mathbf{b} = \sum_{i=1}^n a_i \cdot b_i = a_1b_1 + a_2b_2 + \dots + a_nb_n
-  \]
+$$\mathbf{a} \cdot \mathbf{b} = \sum_{i=1}^n a_i \cdot b_i = a_1b_1 + a_2b_2 + \dots + a_nb_n$$
 - **几何意义**：反映两个向量的方向相似性，常用于计算相似度（如余弦相似度）
 - **范例**：
-  ```python
+```python
 import numpy as np
 
 a = np.array([1, 2, 3])  # 三维向量
@@ -72,17 +70,16 @@ print(dot_product)  # 输出：1*4 + 2*5 + 3*6 = 32
 ### **2.4. 外积（Outer Product）**
 
 - **定义**: 两个向量的外积生成一个**矩阵**，矩阵的第 \(i\) 行第 \(j\) 列元素是第一个向量的第 \(i\) 个分量与第二个向量的第 \(j\) 个分量的乘积。
-- **公式**：  
-  如果 \(\mathbf{a}\) 是 \(m\) 维向量，\(\mathbf{b}\) 是 \(n\) 维向量，则外积结果为 \(m \times n\) 的矩阵：
-  \[
-  \mathbf{a} \otimes \mathbf{b} = 
-  \begin{bmatrix}
-  a_1b_1 & a_1b_2 & \dots & a_1b_n \\
-  a_2b_1 & a_2b_2 & \dots & a_2b_n \\
-  \vdots & \vdots & \ddots & \vdots \\
-  a_mb_1 & a_mb_2 & \dots & a_mb_n
-  \end{bmatrix}
-  \]
+- **公式**： 如果 $\mathbf{a}$ 是 $m$ 维向量， $\mathbf{b}$ 是 $n$ 维向量，则外积结果为 $m \times n$ 的矩阵：
+```math
+\mathbf{a} \otimes \mathbf{b} = 
+\begin{bmatrix}
+a_1b_1 & a_1b_2 & \dots & a_1b_n \\
+a_2b_1 & a_2b_2 & \dots & a_2b_n \\
+\vdots & \vdots & \ddots & \vdots \\
+a_mb_1 & a_mb_2 & \dots & a_mb_n
+\end{bmatrix}
+```
 
 - **条件**: 无维度限制，任意两个向量均可计算外积。
 - **示例**: 
@@ -136,15 +133,15 @@ print(elementwise_product)  # 输出：[4, 10, 18]
 - **公式**：`cosθ = (a·b) / (|a||b|)`
 - **意义**：忽略向量长度，仅比较方向相似性（范围 [-1, 1]）。
 - **范例**：
-  ```python
-  import numpy as np
+```python
+import numpy as np
 
-  def cosine_similarity(a, b):
-      return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
-  
-  a = np.array([1, 2, 3])
-  b = np.array([4, 5, 6])
-  print(cosine_similarity(a, b))  # 输出 ≈ 0.974
+def cosine_similarity(a, b):
+    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+
+a = np.array([1, 2, 3])
+b = np.array([4, 5, 6])
+print(cosine_similarity(a, b))  # 输出 ≈ 0.974
 ```
 - 应用：从海量向量中快速找到与目标最相似的向量。
   - 图片搜索（以图搜图）
