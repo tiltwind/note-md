@@ -53,10 +53,14 @@ Python的设计理念是“优雅”、“明确”、“简单”，它的一�
 
 mac install:
 ```bash
-curl -O https://www.python.org/ftp/python/3.11.5/python-3.11.5-macos11.pkg
 
-open python-3.11.5-macos11.pkg
+# check the latest version from https://www.python.org/downloads/
+curl -O https://www.python.org/ftp/python/3.13.2/python-3.13.2-macos11.pkg
+open python-3.13.2-macos11.pkg
 
+
+# sudo vi /etc/profile
+# alias python=python3
 which python
 # python: aliased to python3
 
@@ -64,17 +68,18 @@ which python3
 #  /usr/local/bin/python3
 
 ls -l /usr/local/bin/python3
-# lrwxr-xr-x  1 root  wheel  70 Sep 27 09:57 /usr/local/bin/python3 -> ../../../Library/Frameworks/Python.framework/Versions/3.11/bin/python3
+# lrwxr-xr-x  1 root  wheel  70 Sep 27 09:57 /usr/local/bin/python3 -> ../../../Library/Frameworks/Python.framework/Versions/3.13/bin/python3
 
 cd /Library/Frameworks/Python.framework/Versions
 ls -l
 # drwxrwxr-x  11 root  admin  352 Sep 27 09:57 3.11
-# lrwxr-xr-x   1 root  wheel    4 Sep 27 09:57 Current -> 3.11
+# lrwxr-xr-x   1 root  wheel    4 Sep 27 09:57 Current -> 3.13
 ```
 
 linux install:
 ```bash
 
+# check the latest version from https://www.python.org/downloads/
 wget https://www.python.org/ftp/python/3.12.0/Python-3.12.0.tgz
 tar -xvf Python-3.12.0.tgz
 
@@ -92,14 +97,6 @@ ln -sf /usr/local/bin/pip3 /usr/local/bin/pip
 
 ```
 
-install pip:
-```bash
-curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-python get-pip.py
-
-# A new release of pip is available: 23.2.1 -> 23.3.1
-pip install --upgrade pip
-```
 
 ### 2.1. Python 解释器
 
@@ -2062,6 +2059,101 @@ async def run():
 
 
 ## 23. Python GC
+
+
+## 24. pip 包管理
+
+
+install pip, pip 是 Python 包管理工具，该工具提供了对Python 包的查找、下载、安装、卸载的功能:
+```bash
+curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+python get-pip.py
+
+# add /Users/<user>/Library/Python/3.9/bin into PATH
+# sudo vi /etc/profile
+# export PATH=$PATH:/Users/hk/Library/Python/3.9/bin
+export PATH=$PATH:/Users/hk/Library/Python/3.9/bin
+
+# A new release of pip is available: 23.2.1 -> 23.3.1
+pip install --upgrade pip
+
+# 设置
+pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+# Writing to /Users/hk/.config/pip/pip.conf
+
+```
+
+在 python 中，安装的第三方包会存放在 python 的安装目录下的 lib/site-packages 文件夹下，比如：`/Users/hk/Library/Python/3.9/lib/python/site-packages`
+
+```bash
+# install
+pip install SomePackage              # 默认将安装最新版本
+pip install SomePackage==1.0.4       # 指定版本
+pip install 'SomePackage>=1.0.4'     # 最小版本
+
+# upgrade
+pip install --upgrade SomePackage
+pip install -U 包名　　#缩写
+
+# uninstall
+pip uninstall SomePackage
+
+# show info
+pip show -f SomePackage
+
+# list
+pip list
+
+# 分析依赖关系输出到 requirements.txt文件
+# 列出当前 Python 环境中所有已安装的包及其版本号，包括直接安装的依赖和间接依赖（即依赖的依赖）。
+pip freeze > requirements.txt
+
+# 根据requirements.txt 版本安装
+pip install -r requirements.txt
+
+# ----------------------------
+# 使用 pipreqs 安装依赖
+pip install pipreqs
+
+# 使用 pipreqs 分析依赖
+# 通过扫描项目目录中的 Python 文件，分析 import 语句，识别项目实际使用的包。然后生成一个 requirements.txt，只包含项目代码中直接引用的依赖。
+pipreqs .
+
+```
+
+## 25. python 虚拟环境
+
+Python 虚拟环境是一种工具，用于为不同的项目创建独立的 Python 运行环境。
+它的主要目的是解决依赖冲突问题，确保每个项目拥有自己的 Python 解释器和依赖库版本，而不会干扰系统的全局 Python 环境或其他项目。
+
+为什么使用虚拟环境？
+- 隔离性：不同项目可能需要不同版本的库（例如，项目 A 需要 Django 2.0，项目 B 需要 Django 3.0），虚拟环境可以避免冲突。
+- 可移植性：虚拟环境中的依赖可以通过 requirements.txt 文件导出，便于在其他机器上重现环境。
+- 清洁性：避免在全局环境中安装过多包，导致环境混乱。
+
+Python 提供了内置工具 venv 来创建和管理虚拟环境，同时也有第三方工具如 virtualenv 和 conda，但本文主要介绍 venv，因为它是 Python 标准库的一部分。
+
+```bash
+# 创建虚拟环境
+# python -m venv 虚拟环境名称
+python -m venv venv
+
+# 进入虚拟环境
+source venv/bin/activate
+
+pip install requests
+pip list
+
+# 将项目中的依赖写入到 requirements.txt
+pip freeze > requirements.txt
+# 根据 requirements.txt 指定的版本安装
+pip install -r requirements.txt
+
+# 退出虚拟环境
+deactivate
+
+```
+
 
 ## 24. Python 和 Java 性能对比
 

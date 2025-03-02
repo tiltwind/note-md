@@ -1,5 +1,10 @@
 # ai
 
+- 2025-02-26, [向量数据库](llm-vector-database.html), titlwind
+- 2025-02-19, [模型微调(fine-tuning)](fine-tuning.html), titlwind
+- 2025-02-19, [LLM 词汇](llm-terms.html), titlwind
+- 2025-02-19, [LLM 格式及模块](llm-model-format-modules.html), titlwind
+- 2025-02-19, [AI联网搜索功能](llm-network-search.html), titlwind
 - 2023-09-16, [AI提示词 —— 代码生成（redis task queue）](prompts-code-gen-redis-queue.html), titlwind
 - 2023-07-31, [AI提示词 —— 项目作战室](prompts-agile-war-room.html), titlwind
 - 2023-07-31, [AI提示词 —— 活动安全](prompts-activity-security.html), titlwind

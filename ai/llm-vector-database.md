@@ -247,6 +247,20 @@ sentence_embedding = outputs.last_hidden_state[0, 0, :]  # shape: [768]
 | BERT-base  | 768      | 是         | 超大（百亿词）     | 句子分类、问答系统     |  
 | RoBERTa    | 768-1024 | 是         | 超大（千亿词）     | 文本生成、情感分析     |  
 
+
+### 3.4 embedding向量纬度
+
+向量维度和文本切片长度之间存在间接关系：较大维度（如768）适合较长的切片（200-500个token），而较小维度（如384）适合较短的切片（100-200个token）。
+建议用户根据具体任务实验调整切片长度，确保语义完整性和检索准确性。
+
+
+| 向量维度 | 推荐token范围 | 约等同于词数范围 | 约等同于句子数范围 |
+|----------|----------------|--------------------|----------------------|
+| 384      | 100-200        | 67-133             | 1-3                  |
+| 768      | 200-500        | 133-333            | 2-5                  |
+
+
+
 ---
 
 ## **4. 向量索引**
@@ -392,8 +406,40 @@ Milvus 的计算节点采用共享存储架构，具有存算分离和水平扩�
 > 参考: https://milvus.io/docs/architecture_overview.md
 
 
+安装 milvus: https://milvus.io/docs/install_standalone-docker-compose.md
+
+```bash
+mkdir milvus
+cd milvus
+
+# Download the configuration file
+wget https://github.com/milvus-io/milvus/releases/download/v2.5.5/milvus-standalone-docker-compose.yml -O docker-compose.yml
+
+# Start Milvus
+sudo docker-compose up -d
+
+# Creating milvus-etcd  ... done
+# Creating milvus-minio ... done
+# Creating milvus-standalone ... done
+
+sudo docker-compose ps
+
+#       Name                     Command                  State                            Ports
+# --------------------------------------------------------------------------------------------------------------------
+# milvus-etcd         etcd -advertise-client-url ...   Up             2379/tcp, 2380/tcp
+# milvus-minio        /usr/bin/docker-entrypoint ...   Up (healthy)   9000/tcp
+# milvus-standalone   /tini -- milvus run standalone   Up             0.0.0.0:19530->19530/tcp, 0.0.0.0:9091->9091/tcp
+
+# Stop Milvus
+sudo docker compose down
+
+# Delete service data
+sudo rm -rf volumes
+```
 
 ### 5.5 Milvus 向量数据库使用范例
+
+
 
 ```python
 from langchain_community.document_loaders import WebBaseLoader
@@ -403,37 +449,44 @@ from pymilvus import connections, CollectionSchema, FieldSchema, DataType, Colle
 
 # 1. 读取多个网页文档内容
 urls = [
-    "https://example1.com",
-    "https://example2.com",
-    "https://example3.com"
+    "https://milvus.io/docs/glossary.md",
+    "https://milvus.io/docs/architecture_overview.md",
 ]
 loader = WebBaseLoader(urls)
 documents = loader.load()
 
 # 2. 对文档进行分块，每块长度1024
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=1024, chunk_overlap=0)
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=1024, chunk_overlap=64)
 split_docs = text_splitter.split_documents(documents)
 
 # 3. 使用本地 text-embedding-v2 模型将分块转化为高维向量
-model = SentenceTransformer('text-embedding-v2')
+# 查看SentenceTransformer支持的模型 https://huggingface.co/models?sort=likes&search=SentenceTransformer
+# all-MiniLM-L6-v2 maps sentences & paragraphs to a 384 dimensional dense vector space and can be used for tasks like clustering or semantic search.
+# model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+# all-mpnet-base-v2 maps sentences & paragraphs to a 768 dimensional dense vector space and can be used for tasks like clustering or semantic search.
+model = SentenceTransformer('sentence-transformers/all-mpnet-base-v2')
+
 texts = [doc.page_content for doc in split_docs]
 embeddings = model.encode(texts, convert_to_numpy=True)
 
 # 4. 连接 Milvus 并创建 collection
 connections.connect(host='localhost', port='19530')
 
+# Dimension of the vector
+dimensions = 768
+
 # 定义字段 schema
 fields = [
     FieldSchema(name="id", dtype=DataType.INT64, is_primary=True, auto_id=True),
-    FieldSchema(name="embedding", dtype=DataType.FLOAT_VECTOR, dim=embeddings.shape[1]),
+    FieldSchema(name="embedding", dtype=DataType.FLOAT_VECTOR, dim=dimensions),
     FieldSchema(name="text", dtype=DataType.VARCHAR, max_length=65535)
 ]
 
 # 创建 collection schema
-schema = CollectionSchema(fields=fields, description="web documents collection")
+schema = CollectionSchema(fields=fields, description="documents collection")
 
 # 创建 collection
-collection_name = "web_docs"
+collection_name = "rag_docs"
 if utility.has_collection(collection_name):
     utility.drop_collection(collection_name)
 collection = Collection(name=collection_name, schema=schema)
@@ -454,6 +507,8 @@ index_params = {
 collection.create_index(field_name="embedding", index_params=index_params)
 
 # 加载 collection 到内存
+# load() 会将这些索引结构加载到内存。原始文本（或其他标量字段，如 text）通常是按需加载的，不会全部预加载到内存中。
+# 这意味着内存使用主要由向量索引的大小决定，而不是文本数据的大小。
 collection.load()
 
 # 7. 执行查询
@@ -481,6 +536,84 @@ connections.disconnect("default")
 ```
 
 ---
+
+## 6. 向量数据库应用场景
+
+
+### 6.1 检索增强生成 (RAG) 
+
+检索增强生成 （RAG） 是一种旨在优化大型语言模型 （）LLMs 输出的架构。
+通过使用向量搜索，RAG 应用程序可以将向量嵌入存储在数据库中，并在LLM生成响应时检索相关文档作为附加上下文，从而提高答案的质量和相关性。
+
+![](images/vector-database-rag.jpeg)
+
+以上是检索增强生成 (RAG) 的经典模式，将个人/企业的知识库向量化存入向量数据库后，在和大模型沟通时，先查询向量数据库获得相关的知识库资料，
+补充到提示词中一起提交给大模型，可以得到更个性化更准确的答案。
+
+```python
+
+user_question = "这些文档讨论的主要技术是什么？"
+
+# 提取向量数据库查询 top-k 结果
+# contexts = [hit.entity.get('text') for hit in results[0]]
+contexts = []
+for result in results:
+    for hit in result:
+        contexts.append(hit.entity.get('text'))
+
+
+"""构建RAG提示模板"""
+context_str = "\n\n".join([f"[Context {i+1}]: {ctx}" for i, ctx in enumerate(contexts)])
+
+prompt = f"""请基于以下上下文信息回答问题。如果上下文不包含答案或信息不足，请直接回答你不知道。
+
+{context_str}
+
+[问题]: {user_question}
+
+请用中文给出清晰、简洁的回答，并确保回答完全基于提供的上下文。"""
+
+print(prompt)
+
+deep_api_key = "your api key"
+
+response = requests.post(
+    "https://api.deepseek.com/v1/chat/completions",
+    headers={
+        "Authorization": f"Bearer {deep_api_key}",
+        "Content-Type": "application/json"
+    },
+    json={
+        "model": "deepseek-chat",
+        "messages": [
+            {"role": "system", "content": "你是一个专业的AI助手，能够准确根据提供的信息回答问题"},
+            {"role": "user", "content": prompt}
+        ],
+        "temperature": 0.3,
+        "max_tokens": 8192
+    },
+    timeout=30
+)
+
+print(response.json()["choices"][0]["message"]["content"])
+
+```
+
+
+### 6.2. 语义搜索(Semantic search)
+
+语义搜索是一种搜索技术，它根据查询的含义返回结果，而不是简单地匹配关键字。
+它使用嵌入来解释不同语言和各种类型数据（例如文本、图像和音频）的含义。
+然后，向量搜索算法使用这些嵌入来查找满足用户查询的最相关数据。
+
+
+### 6.3. 推荐引擎(Recommendation engine)
+
+推荐引擎是一个系统，可主动推荐与用户相关且个性化的内容、产品或服务。
+它通过创建表示用户行为和偏好的嵌入来实现这一点。
+这些嵌入可帮助系统识别其他用户已与之互动或表现出兴趣的类似项目。
+这增加了推荐对用户既相关又有吸引力的可能性。
+
 
 ## Reference
 

@@ -73,6 +73,7 @@ LoRA模型的使用涉及安装插件和配置参数。用户需要下载适合�
 
 > 参考: LoRA: Low-Rank Adaptation of Large Language Models, https://arxiv.org/abs/2106.09685
 
+
 ### 3.2. QLoRA
 
 QLoRA是一种针对大语言模型的高效微调方法，能在有限的显存条件下，如48GB GPU上微调65B参数模型，同时保持与16位精度相当的性能。
