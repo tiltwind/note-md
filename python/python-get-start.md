@@ -59,13 +59,22 @@ curl -O https://www.python.org/ftp/python/3.13.2/python-3.13.2-macos11.pkg
 open python-3.13.2-macos11.pkg
 
 
-# sudo vi /etc/profile
-# alias python=python3
-which python
-# python: aliased to python3
-
 which python3
 #  /usr/local/bin/python3
+
+python3 -m pip --version
+# pip 24.3.1 from /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/pip (python 3.13)
+
+
+# sudo vi /etc/profile
+alias python=python3
+alias pip=pip3
+export PATH=$PATH:/Library/Frameworks/Python.framework/Versions/3.13/bin
+
+which python
+# python: aliased to python3
+which pip
+# pip: aliased to pip3
 
 ls -l /usr/local/bin/python3
 # lrwxr-xr-x  1 root  wheel  70 Sep 27 09:57 /usr/local/bin/python3 -> ../../../Library/Frameworks/Python.framework/Versions/3.13/bin/python3
@@ -74,6 +83,16 @@ cd /Library/Frameworks/Python.framework/Versions
 ls -l
 # drwxrwxr-x  11 root  admin  352 Sep 27 09:57 3.11
 # lrwxr-xr-x   1 root  wheel    4 Sep 27 09:57 Current -> 3.13
+
+# 设置
+pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+# Writing to /Users/hk/.config/pip/pip.conf
+
+pip install --trusted-host pypi.tuna.tsinghua.edu.cn certifi
+
+# sudo vi /etc/profile
+export REQUESTS_CA_BUNDLE=$(python -c "import certifi; print(certifi.where())")
+
 ```
 
 linux install:
@@ -2081,6 +2100,7 @@ pip install --upgrade pip
 pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
 # Writing to /Users/hk/.config/pip/pip.conf
 
+pip install --trusted-host pypi.tuna.tsinghua.edu.cn certifi
 ```
 
 在 python 中，安装的第三方包会存放在 python 的安装目录下的 lib/site-packages 文件夹下，比如：`/Users/hk/Library/Python/3.9/lib/python/site-packages`
