@@ -1,5 +1,6 @@
 # ai
 
+- 2025-04-03, [基于MCP协议和MySQL的电商智能服务扩展](mcp-mysql-ext.html), titlwind
 - 2025-02-26, [向量数据库](llm-vector-database.html), titlwind
 - 2025-02-19, [模型微调(fine-tuning)](fine-tuning.html), titlwind
 - 2025-02-19, [LLM 词汇](llm-terms.html), titlwind
