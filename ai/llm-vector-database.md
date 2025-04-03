@@ -70,12 +70,12 @@ print(dot_product)  # 输出：1*4 + 2*5 + 3*6 = 32
 ### **2.4. 外积（Outer Product）**
 
 - **定义**: 两个向量的外积生成一个**矩阵**，矩阵的第 \(i\) 行第 \(j\) 列元素是第一个向量的第 \(i\) 个分量与第二个向量的第 \(j\) 个分量的乘积。
-- **公式**： 如果 $$\mathbf{a}$$ 是 $$m$$ 维向量， $$\mathbf{b}$$ 是 $$n$$ 维向量，则外积结果为 $$m \times n$$ 的矩阵：
+- **公式**： 如果 a 是 m 维向量， b 是 n 维向量，则外积结果为 `m * n` 的矩阵：
 $$\mathbf{a} \otimes \mathbf{b} = 
 \begin{bmatrix}
-a_1b_1 & a_1b_2 & \dots & a_1b_n \\
-a_2b_1 & a_2b_2 & \dots & a_2b_n \\
-\vdots & \vdots & \ddots & \vdots \\
+a_1b_1 & a_1b_2 & \dots & a_1b_n \\ 
+a_2b_1 & a_2b_2 & \dots & a_2b_n \\ 
+\vdots & \vdots & \ddots & \vdots \\ 
 a_mb_1 & a_mb_2 & \dots & a_mb_n
 \end{bmatrix}$$
 
