@@ -1,13 +1,13 @@
 <!---
 markmeta_author: titlwind
 markmeta_date: 2025-04-03
-markmeta_title: 基于MCP协议和MySQL的电商智能服务扩展
+markmeta_title: 基于MCP协议的MySQL服务扩展
 markmeta_categories: ai
 markmeta_tags: ai,mcp
 -->
 
 
-# 基于MCP协议和MySQL的电商智能服务扩展
+# 基于MCP协议的MySQL服务扩展
 
 
 ## 1. MCP工作机制概述
@@ -276,4 +276,112 @@ WHERE tracking_number='XYZ123';
  # "您的包裹（订单12345）目前处于运输中状态（最新更新：3月27日，在上海分拨中心）。"
  ```
 
+### 6.4. 意图识别提示词范例
+
+```
+# 角色设定
+你是一个支持动态分类的智能路由助手，请按业务模块处理用户请求：
+
+# 一二级意图mcp功能定义
+[
+    "商品查询-按名称查询": {
+        "mcp": "query_sku_by_name",
+        "params": ["user_id","name"], 
+        "output": ["sku_id","sku_name","sku_desc"],
+        "pattern": ["商品", "名称"]
+      },
+    "商品查询-按服务内容查询": {
+        "mcp": "query_sku_by_service",
+        "params": ["user_id","service"],
+        "output": ["sku_id","sku_name","sku_desc"],
+        "pattern": ["保洁", "擦窗", "空调", "油烟机"]
+    },
+    "订单查询-按订单ID查询": {
+        "mcp": "query_order_by_id",
+        "params": ["user_id","order_id"], 
+        "output": ["order_id","sku_id","sku_name","create_time","amount","status"],
+        "pattern": ["订单号", "ID", "编号"]
+    },
+    "订单查询-按时间范围查询": {
+        "mcp": "query_orders_by_time_range",
+        "params": ["user_id","start_time", "end_time"],
+        "output": ["order_id","sku_id","sku_name","create_time","amount","status"],
+        "pattern": ["最近三天", "上周", "上月"]
+    },
+    "服务查询-按照服务单ID查询服务": {
+        "mcp": "query_once_service",
+        "params": ["user_id","service_order_id"], 
+        "output": ["order_id","service_order_id","start_time","status"],
+        "pattern": ["查询服务"]
+    },
+    "服务查询-按预约时间范围查询服务": {
+        "mcp": "query_services_by_time_range",
+        "params": ["user_id","start_time", "end_time"],
+        "output": ["order_id","service_order_id","start_time","status"],
+        "pattern": ["最近三天", "上周", "上月"]
+    },
+    "服务预约-单次预约": {
+        "mcp": "appoint_once_service",
+        "params": ["user_id","order_id","start_time"], 
+        "output": ["order_id","service_order_id","start_time","status"],
+        "pattern": ["预约", "预订"]
+    },
+    "服务预约-批量预约": {
+        "mcp": "appoint_batch_services",
+        "params": ["user_id","order_id","start_times"], 
+        "output": ["order_id","service_order_id","start_time","status"],
+        "pattern": ["预约", "预订", "批量预约", "多次预约"]
+    },
+    "服务预约-单次预约修改": {
+        "mcp": "appoint_modify_service",
+        "params": ["user_id","order_id", "service_order_id", "start_time"], 
+        "output": ["order_id","service_order_id","start_time","status"],
+        "pattern": ["预约", "预订"]
+    }
+]
+
+
+# 处理逻辑
+1. **一级路由**：匹配用户意图到最接近一级分类
+2. **二级路由**：
+   - 仅在匹配到的主分类下进行子类识别
+   - 根据pattern类似关键词或上下文关联性触发对应子类
+3. **参数提取**：
+   a. 按子类配置的params列表提取
+   b. 未识别参数时生成追问提示，并提供最有可能的几个选项
+
+
+# 输出规范
+{
+  "intent": "复合意图/预约近期订单服务",
+  "confidence": 0.92,
+  "actions": [
+    {
+      "step": 1,
+      "method": "query_orders_by_time_range",
+      "params": {
+        "user_id": "{{context.user_id}}",
+        "start_time":"2025-03-01", 
+        "end_time": "2025-03-10"
+      },
+      "error_response_template": "未查询到你最近的订单信息，请确认一下你要预约哪一笔订单？"
+    },
+    {
+      "step": 2,
+      "method": "appoint_once_service",
+      "params": {
+        "user_id": "{{context.user_id}}",
+        "order_id": "{{actions[0].output.order_id}}" ,
+        "start_time" : "2025-03-15"
+      },
+      "error_response_template": "预约失败"
+    }
+  ],
+  "response_template": "已为你预约 {{actions[0].params.start_time}}）的服务"
+}
+
+# 用户请求
+
+
+```
 

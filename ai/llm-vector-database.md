@@ -53,7 +53,7 @@ markmeta_tags: ai,vector,database
 
 ### 2.3. 点积（内积）
 - **公式**：
-$$\mathbf{a} \cdot \mathbf{b} = \sum_{i=1}^n a_i \cdot b_i = a_1b_1 + a_2b_2 + \dots + a_nb_n$$
+$\mathbf{a} \cdot \mathbf{b} = \sum_{i=1}^n a_i \cdot b_i = a_1b_1 + a_2b_2 + \dots + a_nb_n$
 - **几何意义**：反映两个向量的方向相似性，常用于计算相似度（如余弦相似度）
 - **范例**：
 ```python
@@ -71,13 +71,13 @@ print(dot_product)  # 输出：1*4 + 2*5 + 3*6 = 32
 
 - **定义**: 两个向量的外积生成一个**矩阵**，矩阵的第 \(i\) 行第 \(j\) 列元素是第一个向量的第 \(i\) 个分量与第二个向量的第 \(j\) 个分量的乘积。
 - **公式**： 如果 a 是 m 维向量， b 是 n 维向量，则外积结果为 `m * n` 的矩阵：
-$$\mathbf{a} \otimes \mathbf{b} = 
+$\mathbf{a} \otimes \mathbf{b} = 
 \begin{bmatrix}
-a_1b_1 & a_1b_2 & \dots & a_1b_n \\ 
+a_1b_1 & a_1b_2 & \dots & a_1b_n \\
 a_2b_1 & a_2b_2 & \dots & a_2b_n \\ 
 \vdots & \vdots & \ddots & \vdots \\ 
 a_mb_1 & a_mb_2 & \dots & a_mb_n
-\end{bmatrix}$$
+\end{bmatrix}$
 
 
 - **条件**: 无维度限制，任意两个向量均可计算外积。
@@ -106,7 +106,7 @@ print(outer_product)
 
 - **定义**: 两个向量的对应分量相乘，生成一个新的**同维度向量**。
 - **公式**：  
-$$\mathbf{a} \odot \mathbf{b} = [a_1b_1, a_2b_2, \dots, a_nb_n]$$
+$\mathbf{a} \odot \mathbf{b} = [a_1b_1, a_2b_2, \dots, a_nb_n]$
 
 - **条件**: 两个向量必须**维度相同**。
 - **示例**: 
