@@ -1,5 +1,6 @@
 # ai
 
+- 2025-04-15, [AI超级入口竞争分析](super-ai-entry.html), titlwind
 - 2025-04-10, [意图识别（Intent Recognition） vs 函数调用（Function Call）](intent_recognition_vs_function_call.html), titlwind
 - 2025-04-03, [基于MCP协议的MySQL服务扩展](mcp-mysql-ext.html), titlwind
 - 2025-02-26, [向量数据库](llm-vector-database.html), titlwind
