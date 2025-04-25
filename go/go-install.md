@@ -67,7 +67,7 @@ time sudo ./make.bash
 # golang tools
 # cd $GOPATH/src/github.com/golang/tools && git pull -v && go install ./...
 go install golang.org/x/tools/cmd/...@latest
-
+go install golang.org/x/tools/gopls/...@latest
 
 # golangci-lint
 # cd $GOPATH/src/github.com/golangci/golangci-lint && git pull -v && go install ./...

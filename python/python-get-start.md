@@ -61,7 +61,10 @@ open python-3.13.2-macos11.pkg
 
 which python3
 #  /usr/local/bin/python3
+```
 
+install pip:
+```bash
 python3 -m pip --version
 # pip 24.3.1 from /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/pip (python 3.13)
 
@@ -92,8 +95,9 @@ pip install --trusted-host pypi.tuna.tsinghua.edu.cn certifi
 
 # sudo vi /etc/profile
 export REQUESTS_CA_BUNDLE=$(python -c "import certifi; print(certifi.where())")
-
 ```
+
+
 
 linux install:
 ```bash
@@ -2080,8 +2084,10 @@ async def run():
 ## 23. Python GC
 
 
-## 24. pip 包管理
+## 24. 包管理
 
+
+### 24.1. pip 
 
 install pip, pip 是 Python 包管理工具，该工具提供了对Python 包的查找、下载、安装、卸载的功能:
 ```bash
@@ -2140,6 +2146,19 @@ pip install pipreqs
 pipreqs .
 
 ```
+
+### 24.2. uv
+
+uv - An extremely fast Python package and project manager, written in Rust.
+A single tool to replace pip, pip-tools, pipx, poetry, pyenv, twine, virtualenv, and more. 10-100x faster than pip.
+
+install uv: 
+```bash
+# https://docs.astral.sh/uv/getting-started/installation/
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+```
+
 
 ## 25. python 虚拟环境
 
