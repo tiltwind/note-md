@@ -340,6 +340,29 @@ func main() {
 	for j:=1; j <= 10; j++ {
         println(j)
 	}
+
+    // Go 1.22 新特性: for range over int
+    for i := range 10 {
+        println(i) // 0 to 9
+    }
+
+    // Go 1.22 修复: 循环变量在闭包中的捕获
+    var funcs []func()
+    for i := 0; i < 3; i++ {
+        funcs = append(funcs, func() { println(i) })
+    }
+    for _, f := range funcs {
+        f() // prints 0,1,2 (instead of 3,3,3 in older versions)
+    }
+
+    // Go 1.23 新特性: 迭代器支持，使用 iter 包
+    import "iter"
+
+    func All(seq iter.Seq[int]) {
+        for v := range seq {
+            println(v)
+        }
+    }
 }
 ```
 
@@ -1033,6 +1056,52 @@ func readFile() {
 }
 ```
 
+### 18.4. iter 包 (Go 1.23)
+
+// 支持迭代器操作
+```golang
+import "iter"
+
+func YieldEven(yield func(int) bool) {
+    for i := 0; i < 10; i += 2 {
+        if !yield(i) {
+            return
+        }
+    }
+}
+
+for v := range YieldEven {
+    println(v) // 0,2,4,6,8
+}
+```
+
+### 18.5. structs 包 (Go 1.23)
+
+// 修改结构体属性
+```golang
+import "structs"
+
+type Person struct {
+    Name string
+    Age  int
+}
+
+p := Person{Name: "Alice", Age: 30}
+
+structs.Set(&p, "Age", 31)
+println(p.Age) // 31
+```
+
+### 18.6. unique 包 (Go 1.23)
+
+// 规范化可比较值
+```golang
+import "unique"
+
+h1 := unique.Make("hello")
+h2 := unique.Make("hello")
+print(h1 == h2) // true
+```
 
 ## 19. Go 测试
 
@@ -1492,5 +1561,6 @@ CPU利用率:
 1. 2022-02-16, wongoo, 初版
 2. 2022-02-17, wongoo, 增加泛型、select用法、内部包 internal、包初始化函数
 3. 2022-05-19, wongoo, 升级go版本号, helloworld 例子修改
+4. 2025-07-16, wongoo, 添加 Go 1.22 和 1.23 语言特性更新，包括 for range over int、循环变量捕获修复、迭代器支持、泛型类型别名，以及新包 iter、structs、unique
 
 

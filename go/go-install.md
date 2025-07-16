@@ -64,6 +64,9 @@ time sudo ./make.bash
 ## go tools
 
 ```bash
+# golang debug
+go install github.com/go-delve/delve/cmd/dlv@v1.24.2
+
 # golang tools
 # cd $GOPATH/src/github.com/golang/tools && git pull -v && go install ./...
 go install golang.org/x/tools/cmd/...@latest
