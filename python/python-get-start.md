@@ -3100,6 +3100,559 @@ deactivate
 
 ## 26. Python 性能
 
+Python 是一门解释型、动态类型的高级编程语言，在开发效率和代码可读性方面表现优秀，但在执行性能方面相对较慢。了解 Python 的性能特点和优化方法对于开发高效的应用程序至关重要。
+
+### 26.1. Python 性能特点
+
+**优势：**
+- 开发效率高，代码简洁易读
+- 丰富的标准库和第三方库生态
+- 跨平台兼容性好
+- 适合快速原型开发和数据分析
+
+**劣势：**
+- 执行速度相对较慢（比 C/C++、Go 等编译型语言慢 10-100 倍）
+- 内存占用较高
+- GIL（全局解释器锁）限制了多线程性能
+- 动态类型检查带来额外开销
+
+### 26.2. 影响 Python 性能的主要因素
+
+#### 26.2.1. 解释执行
+
+```python
+# Python 是解释型语言，每次执行都需要解释字节码
+import dis
+
+def add_numbers(a, b):
+    return a + b
+
+# 查看字节码
+print("字节码:")
+dis.dis(add_numbers)
+
+# 输出显示了 Python 需要执行的底层操作
+# 每个简单的操作都需要多个字节码指令
+```
+
+#### 26.2.2. 动态类型检查
+
+```python
+import time
+
+# 动态类型检查的开销
+def dynamic_typing_overhead():
+    start = time.time()
+    
+    # Python 需要在运行时检查类型
+    x = 1
+    for i in range(1000000):
+        x = x + i  # 每次操作都需要类型检查
+    
+    end = time.time()
+    print(f"动态类型操作耗时: {end - start:.4f}秒")
+
+# 对比：使用类型提示（仅提示，不强制）
+def typed_function(a: int, b: int) -> int:
+    return a + b
+
+dynamic_typing_overhead()
+```
+
+#### 26.2.3. GIL（全局解释器锁）
+
+```python
+import threading
+import time
+
+# GIL 限制了真正的并行执行
+def cpu_bound_task(n):
+    """CPU 密集型任务"""
+    total = 0
+    for i in range(n):
+        total += i * i
+    return total
+
+def test_gil_impact():
+    n = 1000000
+    
+    # 单线程执行
+    start = time.time()
+    result1 = cpu_bound_task(n)
+    result2 = cpu_bound_task(n)
+    single_thread_time = time.time() - start
+    
+    # 多线程执行（受 GIL 限制）
+    start = time.time()
+    threads = []
+    results = []
+    
+    def worker(n, results, index):
+        results.append(cpu_bound_task(n))
+    
+    results = [None, None]
+    t1 = threading.Thread(target=lambda: worker(n, results, 0))
+    t2 = threading.Thread(target=lambda: worker(n, results, 1))
+    
+    t1.start()
+    t2.start()
+    t1.join()
+    t2.join()
+    
+    multi_thread_time = time.time() - start
+    
+    print(f"单线程耗时: {single_thread_time:.4f}秒")
+    print(f"多线程耗时: {multi_thread_time:.4f}秒")
+    print(f"性能提升: {single_thread_time / multi_thread_time:.2f}x")
+
+test_gil_impact()
+```
+
+#### 26.2.4. 内存管理开销
+
+```python
+import sys
+
+# Python 对象的内存开销
+print("基本数据类型内存占用:")
+print(f"int(42): {sys.getsizeof(42)} bytes")
+print(f"float(3.14): {sys.getsizeof(3.14)} bytes")
+print(f"str('hello'): {sys.getsizeof('hello')} bytes")
+print(f"list([1,2,3]): {sys.getsizeof([1,2,3])} bytes")
+print(f"dict({{'a':1}}): {sys.getsizeof({'a':1})} bytes")
+
+# 对比 C 语言中的基本类型通常只需要 4-8 字节
+# Python 对象包含了类型信息、引用计数等额外数据
+```
+
+### 26.3. 性能优化方案
+
+#### 26.3.1. 算法和数据结构优化
+
+```python
+import time
+from collections import deque, defaultdict
+
+# 1. 选择合适的数据结构
+def list_vs_deque():
+    """列表 vs 双端队列性能对比"""
+    n = 100000
+    
+    # 列表在头部插入效率低
+    start = time.time()
+    lst = []
+    for i in range(n):
+        lst.insert(0, i)  # O(n) 操作
+    list_time = time.time() - start
+    
+    # 双端队列在头部插入效率高
+    start = time.time()
+    dq = deque()
+    for i in range(n):
+        dq.appendleft(i)  # O(1) 操作
+    deque_time = time.time() - start
+    
+    print(f"列表头部插入耗时: {list_time:.4f}秒")
+    print(f"双端队列头部插入耗时: {deque_time:.4f}秒")
+    print(f"性能提升: {list_time / deque_time:.2f}x")
+
+# 2. 使用生成器减少内存占用
+def generator_vs_list():
+    """生成器 vs 列表内存对比"""
+    
+    # 列表：一次性创建所有元素
+    def create_list(n):
+        return [x * x for x in range(n)]
+    
+    # 生成器：按需生成元素
+    def create_generator(n):
+        return (x * x for x in range(n))
+    
+    n = 1000000
+    
+    # 内存使用对比
+    lst = create_list(n)
+    gen = create_generator(n)
+    
+    print(f"列表内存占用: {sys.getsizeof(lst)} bytes")
+    print(f"生成器内存占用: {sys.getsizeof(gen)} bytes")
+
+list_vs_deque()
+print()
+generator_vs_list()
+```
+
+#### 26.3.2. 使用内置函数和库
+
+```python
+import time
+import operator
+from functools import reduce
+
+# 内置函数通常用 C 实现，性能更好
+def builtin_vs_manual():
+    """内置函数 vs 手动实现性能对比"""
+    numbers = list(range(1000000))
+    
+    # 手动实现求和
+    start = time.time()
+    total = 0
+    for num in numbers:
+        total += num
+    manual_time = time.time() - start
+    
+    # 使用内置 sum 函数
+    start = time.time()
+    total = sum(numbers)
+    builtin_time = time.time() - start
+    
+    print(f"手动求和耗时: {manual_time:.4f}秒")
+    print(f"内置sum耗时: {builtin_time:.4f}秒")
+    print(f"性能提升: {manual_time / builtin_time:.2f}x")
+
+# 使用 map, filter, reduce 等函数式编程工具
+def functional_programming_example():
+    """函数式编程示例"""
+    numbers = range(1000000)
+    
+    # 传统方式
+    start = time.time()
+    result = []
+    for x in numbers:
+        if x % 2 == 0:
+            result.append(x * x)
+    traditional_time = time.time() - start
+    
+    # 函数式方式
+    start = time.time()
+    result = list(map(lambda x: x * x, filter(lambda x: x % 2 == 0, numbers)))
+    functional_time = time.time() - start
+    
+    print(f"传统方式耗时: {traditional_time:.4f}秒")
+    print(f"函数式方式耗时: {functional_time:.4f}秒")
+
+builtin_vs_manual()
+print()
+functional_programming_example()
+```
+
+#### 26.3.3. 使用 NumPy 进行数值计算
+
+```python
+import numpy as np
+import time
+
+# NumPy 使用 C 实现，性能远超纯 Python
+def numpy_vs_python():
+    """NumPy vs 纯 Python 性能对比"""
+    size = 1000000
+    
+    # 纯 Python 列表操作
+    python_list1 = list(range(size))
+    python_list2 = list(range(size, size * 2))
+    
+    start = time.time()
+    python_result = [a + b for a, b in zip(python_list1, python_list2)]
+    python_time = time.time() - start
+    
+    # NumPy 数组操作
+    numpy_array1 = np.arange(size)
+    numpy_array2 = np.arange(size, size * 2)
+    
+    start = time.time()
+    numpy_result = numpy_array1 + numpy_array2
+    numpy_time = time.time() - start
+    
+    print(f"Python列表操作耗时: {python_time:.4f}秒")
+    print(f"NumPy数组操作耗时: {numpy_time:.4f}秒")
+    print(f"性能提升: {python_time / numpy_time:.2f}x")
+
+# 注意：需要安装 NumPy
+# pip install numpy
+try:
+    numpy_vs_python()
+except ImportError:
+    print("请安装 NumPy: pip install numpy")
+```
+
+#### 26.3.4. 缓存和记忆化
+
+```python
+from functools import lru_cache
+import time
+
+# 使用缓存避免重复计算
+def fibonacci_comparison():
+    """斐波那契数列：缓存 vs 无缓存"""
+    
+    # 无缓存版本
+    def fib_no_cache(n):
+        if n < 2:
+            return n
+        return fib_no_cache(n-1) + fib_no_cache(n-2)
+    
+    # 使用 LRU 缓存
+    @lru_cache(maxsize=None)
+    def fib_with_cache(n):
+        if n < 2:
+            return n
+        return fib_with_cache(n-1) + fib_with_cache(n-2)
+    
+    n = 35
+    
+    # 测试无缓存版本
+    start = time.time()
+    result1 = fib_no_cache(n)
+    no_cache_time = time.time() - start
+    
+    # 测试缓存版本
+    start = time.time()
+    result2 = fib_with_cache(n)
+    cache_time = time.time() - start
+    
+    print(f"无缓存斐波那契({n})耗时: {no_cache_time:.4f}秒")
+    print(f"缓存斐波那契({n})耗时: {cache_time:.4f}秒")
+    print(f"性能提升: {no_cache_time / cache_time:.2f}x")
+    print(f"缓存信息: {fib_with_cache.cache_info()}")
+
+fibonacci_comparison()
+```
+
+#### 26.3.5. 并发和并行处理
+
+```python
+import asyncio
+import aiohttp
+import requests
+import time
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
+import multiprocessing
+
+# 1. 异步编程处理 I/O 密集型任务
+async def async_http_example():
+    """异步 HTTP 请求示例"""
+    urls = [
+        'https://httpbin.org/delay/1',
+        'https://httpbin.org/delay/1',
+        'https://httpbin.org/delay/1'
+    ]
+    
+    # 同步请求
+    start = time.time()
+    for url in urls:
+        try:
+            response = requests.get(url, timeout=5)
+        except:
+            pass
+    sync_time = time.time() - start
+    
+    # 异步请求
+    async def fetch(session, url):
+        try:
+            async with session.get(url) as response:
+                return await response.text()
+        except:
+            return None
+    
+    start = time.time()
+    async with aiohttp.ClientSession() as session:
+        tasks = [fetch(session, url) for url in urls]
+        await asyncio.gather(*tasks)
+    async_time = time.time() - start
+    
+    print(f"同步请求耗时: {sync_time:.2f}秒")
+    print(f"异步请求耗时: {async_time:.2f}秒")
+    print(f"性能提升: {sync_time / async_time:.2f}x")
+
+# 2. 多进程处理 CPU 密集型任务
+def cpu_intensive_task(n):
+    """CPU 密集型任务"""
+    total = 0
+    for i in range(n):
+        total += i * i
+    return total
+
+def multiprocessing_example():
+    """多进程处理示例"""
+    tasks = [1000000] * 4
+    
+    # 单进程处理
+    start = time.time()
+    results = [cpu_intensive_task(task) for task in tasks]
+    single_process_time = time.time() - start
+    
+    # 多进程处理
+    start = time.time()
+    with ProcessPoolExecutor(max_workers=multiprocessing.cpu_count()) as executor:
+        results = list(executor.map(cpu_intensive_task, tasks))
+    multi_process_time = time.time() - start
+    
+    print(f"单进程处理耗时: {single_process_time:.4f}秒")
+    print(f"多进程处理耗时: {multi_process_time:.4f}秒")
+    print(f"性能提升: {single_process_time / multi_process_time:.2f}x")
+
+# 运行示例
+print("多进程示例:")
+multiprocessing_example()
+
+# 异步示例需要在异步环境中运行
+# asyncio.run(async_http_example())
+```
+
+#### 26.3.6. 使用编译器和 JIT
+
+```python
+# 使用 Numba JIT 编译器加速数值计算
+# pip install numba
+
+try:
+    from numba import jit
+    import numpy as np
+    
+    # 普通 Python 函数
+    def python_sum_of_squares(arr):
+        total = 0
+        for x in arr:
+            total += x * x
+        return total
+    
+    # 使用 Numba JIT 编译
+    @jit(nopython=True)
+    def numba_sum_of_squares(arr):
+        total = 0
+        for x in arr:
+            total += x * x
+        return total
+    
+    def numba_comparison():
+        arr = np.random.random(1000000)
+        
+        # 预热 JIT 编译器
+        numba_sum_of_squares(arr[:100])
+        
+        # 测试 Python 版本
+        start = time.time()
+        result1 = python_sum_of_squares(arr)
+        python_time = time.time() - start
+        
+        # 测试 Numba 版本
+        start = time.time()
+        result2 = numba_sum_of_squares(arr)
+        numba_time = time.time() - start
+        
+        print(f"Python版本耗时: {python_time:.4f}秒")
+        print(f"Numba版本耗时: {numba_time:.4f}秒")
+        print(f"性能提升: {python_time / numba_time:.2f}x")
+    
+    print("\nNumba JIT 编译示例:")
+    numba_comparison()
+    
+except ImportError:
+    print("请安装 Numba: pip install numba")
+```
+
+### 26.4. 性能分析工具
+
+```python
+import cProfile
+import pstats
+import io
+from line_profiler import LineProfiler
+
+# 1. 使用 cProfile 进行性能分析
+def profile_example():
+    """性能分析示例"""
+    
+    def slow_function():
+        total = 0
+        for i in range(100000):
+            total += i * i
+        return total
+    
+    def another_function():
+        return sum(x * x for x in range(50000))
+    
+    def main():
+        result1 = slow_function()
+        result2 = another_function()
+        return result1 + result2
+    
+    # 使用 cProfile 分析
+    pr = cProfile.Profile()
+    pr.enable()
+    
+    result = main()
+    
+    pr.disable()
+    
+    # 输出分析结果
+    s = io.StringIO()
+    ps = pstats.Stats(pr, stream=s).sort_stats('cumulative')
+    ps.print_stats()
+    
+    print("性能分析结果:")
+    print(s.getvalue())
+
+# 2. 内存使用分析
+def memory_usage_example():
+    """内存使用示例"""
+    import tracemalloc
+    
+    # 开始跟踪内存
+    tracemalloc.start()
+    
+    # 创建一些对象
+    data = []
+    for i in range(100000):
+        data.append({'id': i, 'value': i * 2})
+    
+    # 获取内存使用情况
+    current, peak = tracemalloc.get_traced_memory()
+    print(f"当前内存使用: {current / 1024 / 1024:.2f} MB")
+    print(f"峰值内存使用: {peak / 1024 / 1024:.2f} MB")
+    
+    tracemalloc.stop()
+
+print("性能分析示例:")
+profile_example()
+print("\n内存使用示例:")
+memory_usage_example()
+```
+
+### 26.5. 性能优化最佳实践
+
+1. **选择合适的数据结构**
+   - 使用 `set` 进行成员检查而不是 `list`
+   - 使用 `deque` 进行频繁的头尾操作
+   - 使用 `dict` 进行快速查找
+
+2. **避免不必要的计算**
+   - 使用缓存机制
+   - 延迟计算（生成器）
+   - 预计算常用值
+
+3. **利用内置函数和库**
+   - 优先使用内置函数（`sum`, `max`, `min` 等）
+   - 使用 NumPy 进行数值计算
+   - 使用 pandas 进行数据处理
+
+4. **合理使用并发**
+   - I/O 密集型任务使用异步编程
+   - CPU 密集型任务使用多进程
+   - 避免在 CPU 密集型任务中使用多线程
+
+5. **性能监控**
+   - 定期进行性能分析
+   - 监控内存使用
+   - 建立性能基准测试
+
+6. **考虑替代方案**
+   - 使用 PyPy 替代 CPython
+   - 使用 Cython 编写性能关键部分
+   - 使用 Rust/C++ 扩展模块
+
+Python 的性能优化是一个持续的过程，需要根据具体应用场景选择合适的优化策略。记住过早优化是万恶之源，应该先确保代码正确性，然后通过性能分析找出瓶颈，再进行针对性优化。
+
 
 # A. 参考资料
 
