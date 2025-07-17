@@ -280,6 +280,29 @@ for i, v in enumerate(['tic', 'tac', 'toe']):
     print(i, v)
 ```
 
+
+`collections.namedtuple` 提供了一种轻量级的结构体实现：
+
+```python
+from collections import namedtuple
+
+# 定义命名元组结构体
+Person = namedtuple('Person', ['name', 'age', 'city'])
+
+# 创建实例
+p1 = Person('Alice', 25, 'Beijing')
+
+print(p1.name)   # Alice
+print(p1.age)    # 25
+
+# 命名元组是不可变的
+# p1.age = 26    # 报错: AttributeError: can't set attribute
+
+# 可以使用 _replace 方法创建新实例
+p3 = p1._replace(age=26)
+print(p3)        # Person(name='Alice', age=26, city='Beijing')
+```
+
 ### 5.2. 字典 Dict 和 Set
 
 dict全称dictionary，在其他语言中也称为map，使用键-值（key-value）存储.
@@ -1585,7 +1608,121 @@ s.score = 9999
 
 > 注意：属性的方法名不要和实例变量重名。
 
-### 13.7. 定制类
+
+### 13.7. 抽象基类 (ABC)
+
+使用`abc`模块可以定义抽象基类，强制子类实现特定的方法：
+
+```python
+from abc import ABC, abstractmethod
+
+# 定义抽象基类
+class Shape(ABC):
+    """图形抽象基类"""
+    
+    @abstractmethod
+    def area(self):
+        """计算面积的抽象方法"""
+        pass
+    
+    @abstractmethod
+    def perimeter(self):
+        """计算周长的抽象方法"""
+        pass
+    
+    # 可以包含具体方法
+    def description(self):
+        return f"这是一个{self.__class__.__name__}图形"
+
+# 实现抽象基类
+class Rectangle(Shape):
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+    
+    def area(self):
+        return self.width * self.height
+    
+    def perimeter(self):
+        return 2 * (self.width + self.height)
+
+class Circle(Shape):
+    def __init__(self, radius):
+        self.radius = radius
+    
+    def area(self):
+        return 3.14159 * self.radius ** 2
+    
+    def perimeter(self):
+        return 2 * 3.14159 * self.radius
+
+# 使用示例
+rect = Rectangle(5, 3)
+circle = Circle(4)
+
+print(rect.area())          # 15
+print(rect.perimeter())     # 16
+print(rect.description())   # 这是一个Rectangle图形
+
+print(circle.area())        # 50.26544
+print(circle.perimeter())   # 25.13272
+
+# 尝试直接实例化抽象类会报错
+# shape = Shape()  # TypeError: Can't instantiate abstract class Shape with abstract methods area, perimeter
+```
+
+### 13.8. 协议 (Protocol)
+
+Python 3.8+ 引入了`typing.Protocol`，支持结构化子类型（鸭子类型的静态版本）：
+
+```python
+from typing import Protocol
+
+class Drawable(Protocol):
+    """可绘制对象协议"""
+    def draw(self) -> str:
+        ...
+    
+    def get_area(self) -> float:
+        ...
+
+# 实现协议的类（不需要显式继承）
+class Square:
+    def __init__(self, side):
+        self.side = side
+    
+    def draw(self) -> str:
+        return f"绘制边长为{self.side}的正方形"
+    
+    def get_area(self) -> float:
+        return self.side ** 2
+
+class Triangle:
+    def __init__(self, base, height):
+        self.base = base
+        self.height = height
+    
+    def draw(self) -> str:
+        return f"绘制底边{self.base}高{self.height}的三角形"
+    
+    def get_area(self) -> float:
+        return 0.5 * self.base * self.height
+
+# 使用协议的函数
+def render_shape(shape: Drawable) -> None:
+    """渲染图形"""
+    print(shape.draw())
+    print(f"面积: {shape.get_area()}")
+
+# 使用示例
+square = Square(5)
+triangle = Triangle(6, 4)
+
+render_shape(square)    # 绘制边长为5的正方形\n面积: 25
+render_shape(triangle)  # 绘制底边6高4的三角形\n面积: 12.0
+```
+
+### 13.9. 定制类
 
 一个类实现以下定制方法可以实现对应特殊功能:
 
@@ -1599,9 +1736,28 @@ s.score = 9999
 `__getattr__`  | 当调用不存在的属性时，Python解释器会试图调用__getattr__(self, 'xxx')来尝试获得属性
 `__call__`  | 实现该方法后, 可以像函数一样调用 `myclass()`
 
-## 14. IO 
+## 14. 泛型 
 
-### 14.1. 文件读写
+Python 3.12 引入了更简洁的泛型语法：
+
+```python
+# 新语法（Python 3.12+）函数泛型
+def lookup_name[X, Y](mapping: dict[X, Y], key: X, default: Y) -> Y:
+    try:
+        return mapping[key]
+    except KeyError:
+        return default
+
+# 类泛型
+class Stack[T]:
+    def __init__(self):
+        self._items: list[T] = []
+```
+总结：Python 确实支持泛型，但它主要服务于静态类型检查和开发时的代码提示，而不是运行时的类型安全保证。
+
+## 15. IO 
+
+### 15.1. 文件读写
 
 文件读写都有可能产生IOError，一旦出错，后面的f.close()就不用调用。
 
@@ -1669,12 +1825,12 @@ b'\xe4\xb8\xad\xe6\x96\x87'
 ```
 
 
-## 15. 并发
+## 16. 并发
 
 Python既支持多进程，又支持多线程。
 
 
-### 15.1. 多进程
+### 16.1. 多进程
 
 创建单个子进程:
 ```python
@@ -1813,7 +1969,7 @@ if __name__=='__main__':
 # Get C from queue.
 ```
 
-### 15.2. 多线程
+### 16.2. 多线程
 
 Python的标准库提供了两个模块：`_thread`和`threading`，`_thread`是低级模块，`threading`是高级模块，对`_thread`进行了封装。绝大多数情况下，我们只需要使用`threading`这个高级模块。
 
@@ -1881,7 +2037,7 @@ t2.join()
 ```
 
 
-### 15.3. 协程
+### 16.3. 协程
 
 Python对协程的支持是通过`generator`实现的。
 
@@ -1948,7 +2104,7 @@ asyncio.run(main())
 ```
 
 
-### 15.3. 任务
+### 16.4. 任务
 
 协程包装为任务后，支持直接调用和取消。
 
@@ -2049,43 +2205,560 @@ async def run():
 ```
 
 
-## 12. 结构体 struct
+## 17. Python 标准库
+
+### 17.1. os - 操作系统接口
+
+```python
+import os
+
+# 获取当前工作目录
+current_dir = os.getcwd()
+print(f"当前目录: {current_dir}")
+
+# 列出目录内容
+files = os.listdir('.')
+print(f"当前目录文件: {files}")
+
+# 创建目录
+os.makedirs('test_dir', exist_ok=True)
+
+# 环境变量操作
+path = os.environ.get('PATH')
+print(f"PATH环境变量: {path[:100]}...")  # 只显示前100个字符
+
+# 路径操作
+file_path = os.path.join('test_dir', 'test.txt')
+print(f"拼接路径: {file_path}")
+```
+
+### 17.2. sys - 系统相关参数和函数
+
+```python
+import sys
+
+# 获取Python版本信息
+print(f"Python版本: {sys.version}")
+print(f"版本信息: {sys.version_info}")
+
+# 获取命令行参数
+print(f"命令行参数: {sys.argv}")
+
+# 获取模块搜索路径
+print(f"模块路径: {sys.path[:3]}...")  # 只显示前3个路径
+
+# 退出程序
+# sys.exit(0)  # 正常退出
+```
+
+### 17.3. json - JSON数据处理
+
+```python
+import json
+
+# 字典转JSON字符串
+data = {"name": "张三", "age": 30, "city": "北京"}
+json_str = json.dumps(data, ensure_ascii=False, indent=2)
+print(f"JSON字符串:\n{json_str}")
+
+# JSON字符串转字典
+parsed_data = json.loads(json_str)
+print(f"解析后的数据: {parsed_data}")
+
+# 读写JSON文件
+with open('data.json', 'w', encoding='utf-8') as f:
+    json.dump(data, f, ensure_ascii=False, indent=2)
+
+with open('data.json', 'r', encoding='utf-8') as f:
+    loaded_data = json.load(f)
+    print(f"从文件加载的数据: {loaded_data}")
+```
+
+### 17.4. datetime - 日期时间处理
+
+```python
+from datetime import datetime, date, time, timedelta
+
+# 获取当前时间
+now = datetime.now()
+print(f"当前时间: {now}")
+print(f"格式化时间: {now.strftime('%Y-%m-%d %H:%M:%S')}")
+
+# 创建特定日期时间
+specific_date = datetime(2024, 1, 1, 12, 0, 0)
+print(f"特定日期: {specific_date}")
+
+# 时间计算
+tomorrow = now + timedelta(days=1)
+print(f"明天: {tomorrow.strftime('%Y-%m-%d')}")
+
+# 字符串解析为日期
+date_str = "2024-01-01"
+parsed_date = datetime.strptime(date_str, "%Y-%m-%d")
+print(f"解析的日期: {parsed_date}")
+```
+
+### 17.5. re - 正则表达式
+
+```python
+import re
+
+# 基本匹配
+text = "我的邮箱是 example@email.com，电话是 138-1234-5678"
+
+# 查找邮箱
+email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+email = re.search(email_pattern, text)
+if email:
+    print(f"找到邮箱: {email.group()}")
+
+# 查找所有数字
+numbers = re.findall(r'\d+', text)
+print(f"所有数字: {numbers}")
+
+# 替换操作
+masked_text = re.sub(r'\d{3}-\d{4}-\d{4}', '***-****-****', text)
+print(f"脱敏后: {masked_text}")
+```
+
+### 17.6. urllib - URL处理
+
+```python
+from urllib.parse import urlparse, urljoin, quote, unquote
+from urllib.request import urlopen
+
+# URL解析
+url = "https://www.example.com/path?param=value#fragment"
+parsed = urlparse(url)
+print(f"协议: {parsed.scheme}")
+print(f"域名: {parsed.netloc}")
+print(f"路径: {parsed.path}")
+print(f"参数: {parsed.query}")
+
+# URL编码/解码
+chinese_text = "你好世界"
+encoded = quote(chinese_text)
+print(f"编码后: {encoded}")
+decoded = unquote(encoded)
+print(f"解码后: {decoded}")
+
+# URL拼接
+base_url = "https://api.example.com/"
+full_url = urljoin(base_url, "users/123")
+print(f"拼接URL: {full_url}")
+```
+
+## 18. 常用第三方库
+
+### 18.1. requests - HTTP客户端
+
+```python
+import requests
+
+# GET请求
+response = requests.get('https://httpbin.org/get')
+print(f"状态码: {response.status_code}")
+print(f"响应内容: {response.json()}")
+
+# POST请求
+data = {'key': 'value', 'name': '张三'}
+response = requests.post('https://httpbin.org/post', json=data)
+print(f"POST响应: {response.json()['json']}")
+
+# 带参数的请求
+params = {'page': 1, 'size': 10}
+response = requests.get('https://httpbin.org/get', params=params)
+print(f"请求URL: {response.url}")
+
+# 设置请求头
+headers = {'User-Agent': 'My App 1.0'}
+response = requests.get('https://httpbin.org/headers', headers=headers)
+print(f"请求头信息: {response.json()['headers']}")
+```
+
+### 18.2. pandas - 数据分析
+
+```python
+import pandas as pd
+import numpy as np
+
+# 创建DataFrame
+data = {
+    'name': ['张三', '李四', '王五', '赵六'],
+    'age': [25, 30, 35, 28],
+    'city': ['北京', '上海', '广州', '深圳'],
+    'salary': [8000, 12000, 15000, 10000]
+}
+df = pd.DataFrame(data)
+print("原始数据:")
+print(df)
+
+# 基本统计信息
+print(f"\n数据描述:\n{df.describe()}")
+
+# 数据筛选
+high_salary = df[df['salary'] > 10000]
+print(f"\n高薪员工:\n{high_salary}")
+
+# 数据分组
+city_avg_salary = df.groupby('city')['salary'].mean()
+print(f"\n各城市平均薪资:\n{city_avg_salary}")
+
+# 保存到CSV
+df.to_csv('employees.csv', index=False, encoding='utf-8')
+print("\n数据已保存到 employees.csv")
+```
+
+### 18.3. numpy - 数值计算
+
+```python
+import numpy as np
+
+# 创建数组
+arr1 = np.array([1, 2, 3, 4, 5])
+arr2 = np.array([[1, 2], [3, 4], [5, 6]])
+print(f"一维数组: {arr1}")
+print(f"二维数组:\n{arr2}")
+
+# 数组运算
+print(f"数组加法: {arr1 + 10}")
+print(f"数组乘法: {arr1 * 2}")
+print(f"数组平方: {arr1 ** 2}")
+
+# 统计函数
+print(f"平均值: {np.mean(arr1)}")
+print(f"标准差: {np.std(arr1)}")
+print(f"最大值: {np.max(arr1)}")
+print(f"最小值: {np.min(arr1)}")
+
+# 生成特殊数组
+zeros = np.zeros((3, 3))  # 零矩阵
+ones = np.ones((2, 4))    # 全1矩阵
+random_arr = np.random.rand(3, 3)  # 随机数组
+print(f"\n零矩阵:\n{zeros}")
+print(f"\n随机数组:\n{random_arr}")
+```
+
+### 18.4. matplotlib - 数据可视化
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# 设置中文字体支持
+plt.rcParams['font.sans-serif'] = ['SimHei']  # 用来正常显示中文标签
+plt.rcParams['axes.unicode_minus'] = False   # 用来正常显示负号
+
+# 创建数据
+x = np.linspace(0, 10, 100)
+y1 = np.sin(x)
+y2 = np.cos(x)
+
+# 创建图表
+plt.figure(figsize=(10, 6))
+plt.plot(x, y1, label='sin(x)', linewidth=2)
+plt.plot(x, y2, label='cos(x)', linewidth=2)
+
+# 添加标题和标签
+plt.title('三角函数图像', fontsize=16)
+plt.xlabel('x轴', fontsize=12)
+plt.ylabel('y轴', fontsize=12)
+plt.legend()
+plt.grid(True, alpha=0.3)
+
+# 保存图片
+plt.savefig('trigonometric_functions.png', dpi=300, bbox_inches='tight')
+print("图表已保存为 trigonometric_functions.png")
+
+# 显示图表（在Jupyter中使用）
+# plt.show()
+```
+
+### 18.5. sqlite3 - 轻量级数据库
+
+```python
+import sqlite3
+from datetime import datetime
+
+# 连接数据库（如果不存在会自动创建）
+conn = sqlite3.connect('example.db')
+cursor = conn.cursor()
+
+# 创建表
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        email TEXT UNIQUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+''')
+
+# 插入数据
+users_data = [
+    ('张三', 'zhangsan@example.com'),
+    ('李四', 'lisi@example.com'),
+    ('王五', 'wangwu@example.com')
+]
+
+cursor.executemany('INSERT OR IGNORE INTO users (name, email) VALUES (?, ?)', users_data)
+
+# 查询数据
+cursor.execute('SELECT * FROM users')
+results = cursor.fetchall()
+print("用户列表:")
+for row in results:
+    print(f"ID: {row[0]}, 姓名: {row[1]}, 邮箱: {row[2]}, 创建时间: {row[3]}")
+
+# 更新数据
+cursor.execute('UPDATE users SET email = ? WHERE name = ?', ('zhangsan_new@example.com', '张三'))
+
+# 删除数据
+# cursor.execute('DELETE FROM users WHERE name = ?', ('王五',))
+
+# 提交事务并关闭连接
+conn.commit()
+conn.close()
+print("数据库操作完成")
+```
+
+## 19. Web开发相关
+
+### 19.1. Flask - 轻量级Web框架
+
+```python
+from flask import Flask, request, jsonify
+
+# 创建Flask应用
+app = Flask(__name__)
+
+# 路由定义
+@app.route('/')
+def home():
+    """首页路由"""
+    return '<h1>欢迎使用Flask!</h1>'
+
+@app.route('/api/users', methods=['GET'])
+def get_users():
+    """获取用户列表API"""
+    users = [
+        {'id': 1, 'name': '张三', 'email': 'zhangsan@example.com'},
+        {'id': 2, 'name': '李四', 'email': 'lisi@example.com'}
+    ]
+    return jsonify({'users': users, 'total': len(users)})
+
+@app.route('/api/users', methods=['POST'])
+def create_user():
+    """创建用户API"""
+    data = request.get_json()
+    # 这里应该有数据验证和数据库操作
+    new_user = {
+        'id': 3,
+        'name': data.get('name'),
+        'email': data.get('email')
+    }
+    return jsonify({'message': '用户创建成功', 'user': new_user}), 201
+
+@app.route('/api/users/<int:user_id>', methods=['GET'])
+def get_user(user_id):
+    """获取单个用户API"""
+    # 模拟从数据库获取用户
+    user = {'id': user_id, 'name': f'用户{user_id}', 'email': f'user{user_id}@example.com'}
+    return jsonify(user)
+
+if __name__ == '__main__':
+    # 开发模式运行
+    app.run(debug=True, host='0.0.0.0', port=5000)
+```
+
+### 19.2. FastAPI - 现代高性能Web框架
+
+```python
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from typing import List, Optional
+
+# 创建FastAPI应用
+app = FastAPI(title="用户管理API", version="1.0.0")
+
+# 数据模型定义
+class User(BaseModel):
+    id: Optional[int] = None
+    name: str
+    email: str
+    age: Optional[int] = None
+
+class UserResponse(BaseModel):
+    id: int
+    name: str
+    email: str
+    age: Optional[int] = None
+
+# 模拟数据库
+users_db = [
+    {"id": 1, "name": "张三", "email": "zhangsan@example.com", "age": 25},
+    {"id": 2, "name": "李四", "email": "lisi@example.com", "age": 30}
+]
+
+@app.get("/")
+async def root():
+    """根路径"""
+    return {"message": "欢迎使用FastAPI用户管理系统"}
+
+@app.get("/users", response_model=List[UserResponse])
+async def get_users():
+    """获取所有用户"""
+    return users_db
+
+@app.get("/users/{user_id}", response_model=UserResponse)
+async def get_user(user_id: int):
+    """根据ID获取用户"""
+    user = next((user for user in users_db if user["id"] == user_id), None)
+    if not user:
+        raise HTTPException(status_code=404, detail="用户不存在")
+    return user
+
+@app.post("/users", response_model=UserResponse)
+async def create_user(user: User):
+    """创建新用户"""
+    new_id = max([u["id"] for u in users_db]) + 1 if users_db else 1
+    new_user = {"id": new_id, **user.dict()}
+    users_db.append(new_user)
+    return new_user
+
+@app.put("/users/{user_id}", response_model=UserResponse)
+async def update_user(user_id: int, user: User):
+    """更新用户信息"""
+    existing_user = next((u for u in users_db if u["id"] == user_id), None)
+    if not existing_user:
+        raise HTTPException(status_code=404, detail="用户不存在")
+    
+    existing_user.update(user.dict(exclude_unset=True))
+    return existing_user
+
+@app.delete("/users/{user_id}")
+async def delete_user(user_id: int):
+    """删除用户"""
+    global users_db
+    users_db = [user for user in users_db if user["id"] != user_id]
+    return {"message": "用户删除成功"}
+
+# 运行命令: uvicorn main:app --reload
+```
+
+## 20. 数据科学相关
+
+### 20.1. scikit-learn - 机器学习
+
+```python
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+import numpy as np
+import matplotlib.pyplot as plt
+
+# 生成示例数据
+np.random.seed(42)
+X = np.random.rand(100, 1) * 10  # 特征
+y = 2 * X.ravel() + 1 + np.random.randn(100) * 2  # 目标值（带噪声的线性关系）
+
+# 分割训练集和测试集
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# 创建并训练模型
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# 预测
+y_pred = model.predict(X_test)
+
+# 评估模型
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+
+print(f"均方误差 (MSE): {mse:.2f}")
+print(f"决定系数 (R²): {r2:.2f}")
+print(f"模型参数 - 斜率: {model.coef_[0]:.2f}, 截距: {model.intercept_:.2f}")
+
+# 可视化结果
+plt.figure(figsize=(10, 6))
+plt.scatter(X_test, y_test, color='blue', label='实际值', alpha=0.6)
+plt.scatter(X_test, y_pred, color='red', label='预测值', alpha=0.6)
+plt.plot(X_test, y_pred, color='red', linewidth=2)
+plt.xlabel('特征值')
+plt.ylabel('目标值')
+plt.title('线性回归预测结果')
+plt.legend()
+plt.grid(True, alpha=0.3)
+plt.savefig('linear_regression_result.png', dpi=300, bbox_inches='tight')
+print("预测结果图已保存为 linear_regression_result.png")
+```
+
+### 20.2. BeautifulSoup - HTML解析
+
+```python
+from bs4 import BeautifulSoup
+import requests
+
+# 示例HTML内容
+html_content = """
+<html>
+<head>
+    <title>示例网页</title>
+</head>
+<body>
+    <div class="container">
+        <h1 id="main-title">新闻标题</h1>
+        <p class="content">这是第一段新闻内容。</p>
+        <p class="content">这是第二段新闻内容。</p>
+        <ul class="news-list">
+            <li><a href="/news/1">新闻1</a></li>
+            <li><a href="/news/2">新闻2</a></li>
+            <li><a href="/news/3">新闻3</a></li>
+        </ul>
+    </div>
+</body>
+</html>
+"""
+
+# 解析HTML
+soup = BeautifulSoup(html_content, 'html.parser')
+
+# 查找元素
+title = soup.find('title').text
+print(f"页面标题: {title}")
+
+# 通过ID查找
+main_title = soup.find('h1', id='main-title').text
+print(f"主标题: {main_title}")
+
+# 通过class查找所有段落
+content_paragraphs = soup.find_all('p', class_='content')
+print("\n内容段落:")
+for i, p in enumerate(content_paragraphs, 1):
+    print(f"{i}. {p.text}")
+
+# 查找所有链接
+links = soup.find_all('a')
+print("\n所有链接:")
+for link in links:
+    href = link.get('href')
+    text = link.text
+    print(f"链接: {text} -> {href}")
+
+# CSS选择器
+news_items = soup.select('.news-list li a')
+print("\n使用CSS选择器查找新闻:")
+for item in news_items:
+    print(f"- {item.text}: {item['href']}")
+```
 
 
-## 13. 接口 Interface
+
+## 21. Python 单元测试
 
 
-## 14. Python 继承和重写
-
-
-## 15. 泛型
-
-## 16. Python 错误处理
-
-
-## 17. Python 包管理
-
-
-## 18. Python  核心包
-
-
-## 19. Python 测试
-
-
-## 20. Python 模块管理
-
-
-## 21. Python 并发
-
-
-## 22. Python 反射
-
-
-## 23. Python GC
-
-
-## 24. 包管理
-
+## 24. Python 模块管理
 
 ### 24.1. pip 
 
@@ -2160,7 +2833,13 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
 
-## 25. python 虚拟环境
+
+## 26. Python 反射
+
+
+## 27. Python GC
+
+## 28. Python 项目环境
 
 Python 虚拟环境是一种工具，用于为不同的项目创建独立的 Python 运行环境。
 它的主要目的是解决依赖冲突问题，确保每个项目拥有自己的 Python 解释器和依赖库版本，而不会干扰系统的全局 Python 环境或其他项目。
@@ -2194,7 +2873,8 @@ deactivate
 ```
 
 
-## 24. Python 和 Java 性能对比
+## 29. Python 和 Java 性能对比
+
 
 # A. 参考资料
 
