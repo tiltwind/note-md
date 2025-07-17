@@ -2757,6 +2757,493 @@ for item in news_items:
 
 ## 21. Python 单元测试
 
+Python 单元测试是确保代码质量和功能正确性的重要手段。Python 提供了内置的 `unittest` 模块，同时也有第三方库如 `pytest` 提供更简洁的测试方式。
+
+### 21.1. unittest 基础测试
+
+```python
+import unittest
+from unittest.mock import Mock, patch
+
+# 被测试的类
+class Calculator:
+    def add(self, a, b):
+        return a + b
+    
+    def divide(self, a, b):
+        if b == 0:
+            raise ValueError("除数不能为零")
+        return a / b
+    
+    def get_data_from_api(self, url):
+        # 模拟从API获取数据
+        import requests
+        response = requests.get(url)
+        return response.json()
+
+# 测试类
+class TestCalculator(unittest.TestCase):
+    
+    def setUp(self):
+        """每个测试方法执行前调用"""
+        self.calc = Calculator()
+    
+    def tearDown(self):
+        """每个测试方法执行后调用"""
+        pass
+    
+    def test_add(self):
+        """测试加法功能"""
+        result = self.calc.add(2, 3)
+        self.assertEqual(result, 5)
+    
+    def test_divide(self):
+        """测试除法功能"""
+        result = self.calc.divide(10, 2)
+        self.assertEqual(result, 5.0)
+    
+    def test_divide_by_zero(self):
+        """测试除零异常"""
+        with self.assertRaises(ValueError):
+            self.calc.divide(10, 0)
+    
+    @patch('requests.get')
+    def test_api_call(self, mock_get):
+        """测试API调用（使用Mock）"""
+        # 设置Mock返回值
+        mock_response = Mock()
+        mock_response.json.return_value = {'data': 'test'}
+        mock_get.return_value = mock_response
+        
+        result = self.calc.get_data_from_api('http://test.com')
+        
+        # 验证结果和调用
+        self.assertEqual(result, {'data': 'test'})
+        mock_get.assert_called_once_with('http://test.com')
+
+if __name__ == '__main__':
+    unittest.main()
+```
+
+### 21.2. pytest 简洁测试
+
+```python
+import pytest
+from unittest.mock import patch, Mock
+
+# 被测试的函数
+def validate_email(email):
+    """验证邮箱格式"""
+    import re
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return bool(re.match(pattern, email))
+
+def fetch_user_data(user_id):
+    """获取用户数据"""
+    if user_id <= 0:
+        raise ValueError("用户ID必须大于0")
+    # 模拟数据库查询
+    return {"id": user_id, "name": f"User{user_id}"}
+
+# pytest 测试函数
+def test_validate_email_valid():
+    """测试有效邮箱"""
+    assert validate_email("test@example.com") == True
+    assert validate_email("user.name+tag@domain.co.uk") == True
+
+def test_validate_email_invalid():
+    """测试无效邮箱"""
+    assert validate_email("invalid-email") == False
+    assert validate_email("@domain.com") == False
+    assert validate_email("test@") == False
+
+def test_fetch_user_data_valid():
+    """测试获取用户数据"""
+    result = fetch_user_data(1)
+    assert result["id"] == 1
+    assert result["name"] == "User1"
+
+def test_fetch_user_data_invalid():
+    """测试无效用户ID"""
+    with pytest.raises(ValueError, match="用户ID必须大于0"):
+        fetch_user_data(0)
+    
+    with pytest.raises(ValueError):
+        fetch_user_data(-1)
+
+# 参数化测试
+@pytest.mark.parametrize("email,expected", [
+    ("valid@example.com", True),
+    ("another.valid@test.org", True),
+    ("invalid-email", False),
+    ("@invalid.com", False),
+    ("", False),
+])
+def test_email_validation_parametrized(email, expected):
+    """参数化测试邮箱验证"""
+    assert validate_email(email) == expected
+```
+
+### 21.3. 测试夹具和配置
+
+```python
+import pytest
+import tempfile
+import os
+from pathlib import Path
+
+# 被测试的文件操作类
+class FileManager:
+    def __init__(self, base_path):
+        self.base_path = Path(base_path)
+    
+    def create_file(self, filename, content):
+        """创建文件"""
+        file_path = self.base_path / filename
+        file_path.write_text(content, encoding='utf-8')
+        return file_path
+    
+    def read_file(self, filename):
+        """读取文件"""
+        file_path = self.base_path / filename
+        if not file_path.exists():
+            raise FileNotFoundError(f"文件 {filename} 不存在")
+        return file_path.read_text(encoding='utf-8')
+    
+    def list_files(self):
+        """列出所有文件"""
+        return [f.name for f in self.base_path.iterdir() if f.is_file()]
+
+# pytest 夹具
+@pytest.fixture
+def temp_dir():
+    """创建临时目录夹具"""
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        yield tmp_dir
+
+@pytest.fixture
+def file_manager(temp_dir):
+    """文件管理器夹具"""
+    return FileManager(temp_dir)
+
+@pytest.fixture(scope="module")
+def sample_data():
+    """模块级别的测试数据"""
+    return {
+        "users": [
+            {"id": 1, "name": "Alice", "email": "alice@example.com"},
+            {"id": 2, "name": "Bob", "email": "bob@example.com"},
+        ]
+    }
+
+# 使用夹具的测试
+def test_create_and_read_file(file_manager):
+    """测试文件创建和读取"""
+    content = "Hello, World!"
+    filename = "test.txt"
+    
+    # 创建文件
+    file_path = file_manager.create_file(filename, content)
+    assert file_path.exists()
+    
+    # 读取文件
+    read_content = file_manager.read_file(filename)
+    assert read_content == content
+
+def test_read_nonexistent_file(file_manager):
+    """测试读取不存在的文件"""
+    with pytest.raises(FileNotFoundError, match="文件 nonexistent.txt 不存在"):
+        file_manager.read_file("nonexistent.txt")
+
+def test_list_files(file_manager):
+    """测试列出文件"""
+    # 创建多个文件
+    file_manager.create_file("file1.txt", "content1")
+    file_manager.create_file("file2.txt", "content2")
+    
+    files = file_manager.list_files()
+    assert len(files) == 2
+    assert "file1.txt" in files
+    assert "file2.txt" in files
+
+def test_with_sample_data(sample_data):
+    """使用示例数据的测试"""
+    users = sample_data["users"]
+    assert len(users) == 2
+    assert users[0]["name"] == "Alice"
+```
+
+### 21.4. Mock 和 Patch 高级用法
+
+```python
+import pytest
+from unittest.mock import Mock, patch, MagicMock, call
+import requests
+
+# 被测试的服务类
+class UserService:
+    def __init__(self, api_client):
+        self.api_client = api_client
+    
+    def get_user(self, user_id):
+        """获取单个用户"""
+        response = self.api_client.get(f"/users/{user_id}")
+        if response.status_code == 404:
+            return None
+        response.raise_for_status()
+        return response.json()
+    
+    def create_user(self, user_data):
+        """创建用户"""
+        response = self.api_client.post("/users", json=user_data)
+        response.raise_for_status()
+        return response.json()
+    
+    def update_user_batch(self, user_updates):
+        """批量更新用户"""
+        results = []
+        for user_id, data in user_updates.items():
+            response = self.api_client.put(f"/users/{user_id}", json=data)
+            results.append(response.json())
+        return results
+
+class APIClient:
+    def __init__(self, base_url):
+        self.base_url = base_url
+    
+    def get(self, path):
+        return requests.get(f"{self.base_url}{path}")
+    
+    def post(self, path, json=None):
+        return requests.post(f"{self.base_url}{path}", json=json)
+    
+    def put(self, path, json=None):
+        return requests.put(f"{self.base_url}{path}", json=json)
+
+# Mock 测试
+class TestUserService:
+    
+    def test_get_user_success(self):
+        """测试成功获取用户"""
+        # 创建Mock API客户端
+        mock_client = Mock()
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"id": 1, "name": "Alice"}
+        mock_client.get.return_value = mock_response
+        
+        service = UserService(mock_client)
+        result = service.get_user(1)
+        
+        # 验证结果
+        assert result == {"id": 1, "name": "Alice"}
+        mock_client.get.assert_called_once_with("/users/1")
+    
+    def test_get_user_not_found(self):
+        """测试用户不存在"""
+        mock_client = Mock()
+        mock_response = Mock()
+        mock_response.status_code = 404
+        mock_client.get.return_value = mock_response
+        
+        service = UserService(mock_client)
+        result = service.get_user(999)
+        
+        assert result is None
+    
+    def test_create_user(self):
+        """测试创建用户"""
+        mock_client = Mock()
+        mock_response = Mock()
+        mock_response.json.return_value = {"id": 1, "name": "Alice", "email": "alice@example.com"}
+        mock_client.post.return_value = mock_response
+        
+        service = UserService(mock_client)
+        user_data = {"name": "Alice", "email": "alice@example.com"}
+        result = service.create_user(user_data)
+        
+        assert result["id"] == 1
+        mock_client.post.assert_called_once_with("/users", json=user_data)
+    
+    def test_update_user_batch(self):
+        """测试批量更新用户"""
+        mock_client = Mock()
+        
+        # 设置多个返回值
+        mock_responses = [
+            Mock(json=lambda: {"id": 1, "name": "Alice Updated"}),
+            Mock(json=lambda: {"id": 2, "name": "Bob Updated"})
+        ]
+        mock_client.put.side_effect = mock_responses
+        
+        service = UserService(mock_client)
+        updates = {
+            1: {"name": "Alice Updated"},
+            2: {"name": "Bob Updated"}
+        }
+        results = service.update_user_batch(updates)
+        
+        assert len(results) == 2
+        assert results[0]["name"] == "Alice Updated"
+        assert results[1]["name"] == "Bob Updated"
+        
+        # 验证调用次数和参数
+        assert mock_client.put.call_count == 2
+        expected_calls = [
+            call("/users/1", json={"name": "Alice Updated"}),
+            call("/users/2", json={"name": "Bob Updated"})
+        ]
+        mock_client.put.assert_has_calls(expected_calls)
+
+# 使用 patch 装饰器
+@patch('requests.get')
+def test_api_client_get(mock_get):
+    """测试API客户端GET请求"""
+    mock_response = Mock()
+    mock_response.json.return_value = {"data": "test"}
+    mock_get.return_value = mock_response
+    
+    client = APIClient("https://api.example.com")
+    response = client.get("/test")
+    
+    assert response.json() == {"data": "test"}
+    mock_get.assert_called_once_with("https://api.example.com/test")
+
+# 上下文管理器形式的patch
+def test_api_client_with_context():
+    """使用上下文管理器的patch"""
+    with patch('requests.post') as mock_post:
+        mock_response = Mock()
+        mock_response.json.return_value = {"id": 1, "status": "created"}
+        mock_post.return_value = mock_response
+        
+        client = APIClient("https://api.example.com")
+        response = client.post("/users", json={"name": "test"})
+        
+        assert response.json()["status"] == "created"
+        mock_post.assert_called_once_with(
+            "https://api.example.com/users", 
+            json={"name": "test"}
+        )
+```
+
+### 21.5. 测试配置和运行
+
+```python
+# conftest.py - pytest 配置文件
+import pytest
+import os
+from pathlib import Path
+
+# 全局夹具
+@pytest.fixture(scope="session")
+def test_config():
+    """测试配置"""
+    return {
+        "database_url": "sqlite:///:memory:",
+        "api_base_url": "https://test-api.example.com",
+        "debug": True
+    }
+
+@pytest.fixture(autouse=True)
+def setup_test_environment():
+    """自动使用的测试环境设置"""
+    # 设置测试环境变量
+    os.environ["TESTING"] = "true"
+    yield
+    # 清理
+    if "TESTING" in os.environ:
+        del os.environ["TESTING"]
+
+# 自定义标记
+pytest_plugins = []
+
+def pytest_configure(config):
+    """pytest 配置"""
+    config.addinivalue_line(
+        "markers", "slow: marks tests as slow (deselect with '-m "not slow"')"
+    )
+    config.addinivalue_line(
+        "markers", "integration: marks tests as integration tests"
+    )
+
+# 测试用例示例
+@pytest.mark.slow
+def test_slow_operation():
+    """标记为慢速测试"""
+    import time
+    time.sleep(1)  # 模拟慢速操作
+    assert True
+
+@pytest.mark.integration
+def test_integration():
+    """标记为集成测试"""
+    assert True
+
+# 跳过测试
+@pytest.mark.skip(reason="功能尚未实现")
+def test_future_feature():
+    """跳过的测试"""
+    pass
+
+@pytest.mark.skipif(os.name == "nt", reason="不支持Windows")
+def test_unix_only():
+    """条件跳过测试"""
+    assert True
+
+# 预期失败
+@pytest.mark.xfail(reason="已知的bug")
+def test_known_bug():
+    """预期失败的测试"""
+    assert False
+```
+
+### 21.6. 测试运行命令
+
+```bash
+# unittest 运行
+python -m unittest test_module.py
+python -m unittest test_module.TestClass.test_method
+python -m unittest discover -s tests -p "test_*.py"
+
+# pytest 运行
+pytest                              # 运行所有测试
+pytest test_file.py                 # 运行特定文件
+pytest test_file.py::test_function  # 运行特定测试
+pytest -v                           # 详细输出
+pytest -s                           # 显示print输出
+pytest -x                           # 第一个失败后停止
+pytest --tb=short                   # 简短的错误信息
+pytest -m "not slow"                # 排除慢速测试
+pytest -k "test_user"               # 运行名称包含test_user的测试
+pytest --cov=mymodule               # 代码覆盖率
+pytest --cov-report=html            # HTML覆盖率报告
+```
+
+### 21.7. 测试最佳实践
+
+1. **测试命名**
+   - 使用描述性的测试名称
+   - 遵循 `test_[功能]_[场景]_[期望结果]` 模式
+
+2. **测试结构**
+   - 遵循 AAA 模式：Arrange（准备）、Act（执行）、Assert（断言）
+   - 每个测试只测试一个功能点
+
+3. **测试数据**
+   - 使用夹具管理测试数据
+   - 避免测试间的数据依赖
+
+4. **Mock 使用**
+   - 对外部依赖使用Mock
+   - 验证Mock的调用参数和次数
+
+5. **测试覆盖率**
+   - 追求高覆盖率但不盲目追求100%
+   - 重点测试核心业务逻辑
+
+Python 单元测试是保证代码质量的重要手段，合理使用 unittest 和 pytest 可以构建可靠的测试体系。
+
 
 ## 22. Python 模块管理
 
