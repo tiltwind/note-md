@@ -3062,6 +3062,585 @@ Python 的反射机制非常强大，常用于：
 
 ## 24. Python GC
 
+Python 的垃圾回收（Garbage Collection，GC）是自动内存管理的核心机制，负责回收不再使用的对象所占用的内存。Python 采用了多种垃圾回收策略的组合来确保内存的有效管理。
+
+### 24.1. Python GC 架构
+
+Python 的垃圾回收系统采用了分层架构，主要包括以下几个组件：
+
+```python
+import gc
+import sys
+import weakref
+from collections import defaultdict
+
+# 查看 GC 的基本信息
+print("GC 基本信息:")
+print(f"GC 是否启用: {gc.isenabled()}")
+print(f"GC 阈值: {gc.get_threshold()}")
+print(f"GC 统计: {gc.get_stats()}")
+print(f"当前 GC 计数: {gc.get_count()}")
+```
+
+#### 24.1.1. 内存管理层次
+
+```python
+# Python 内存管理的层次结构
+"""
+应用层对象
+    ↓
+Python 对象管理器 (PyObject_*)
+    ↓
+Python 内存分配器 (PyMem_*)
+    ↓
+C 运行时库 (malloc/free)
+    ↓
+操作系统内存管理
+"""
+
+# 演示对象的内存分配
+class MemoryDemo:
+    def __init__(self, data):
+        self.data = data
+        self.ref_count = sys.getrefcount(self)
+    
+    def __del__(self):
+        print(f"对象 {id(self)} 被销毁")
+
+# 创建对象并观察引用计数
+obj1 = MemoryDemo("test data")
+print(f"obj1 引用计数: {sys.getrefcount(obj1)}")
+
+obj2 = obj1  # 增加引用
+print(f"obj1 引用计数: {sys.getrefcount(obj1)}")
+
+del obj2  # 减少引用
+print(f"obj1 引用计数: {sys.getrefcount(obj1)}")
+
+del obj1  # 最后一个引用被删除，对象被销毁
+```
+
+### 24.2. Python GC 算法
+
+Python 使用多种垃圾回收算法的组合：
+
+#### 24.2.1. 引用计数（Reference Counting）
+
+```python
+import sys
+
+# 引用计数是 Python 的主要垃圾回收机制
+class RefCountDemo:
+    def __init__(self, name):
+        self.name = name
+    
+    def __repr__(self):
+        return f"RefCountDemo({self.name})"
+
+def demonstrate_ref_counting():
+    # 创建对象
+    obj = RefCountDemo("test")
+    print(f"创建后引用计数: {sys.getrefcount(obj)}")
+    
+    # 添加引用
+    ref1 = obj
+    print(f"添加引用后: {sys.getrefcount(obj)}")
+    
+    # 放入列表
+    lst = [obj]
+    print(f"放入列表后: {sys.getrefcount(obj)}")
+    
+    # 删除引用
+    del ref1
+    print(f"删除引用后: {sys.getrefcount(obj)}")
+    
+    # 清空列表
+    lst.clear()
+    print(f"清空列表后: {sys.getrefcount(obj)}")
+    
+    return obj
+
+obj = demonstrate_ref_counting()
+print(f"函数返回后: {sys.getrefcount(obj)}")
+```
+
+#### 24.2.2. 循环引用检测（Cycle Detection）
+
+```python
+import gc
+import weakref
+
+# 循环引用问题演示
+class Node:
+    def __init__(self, name):
+        self.name = name
+        self.children = []
+        self.parent = None
+    
+    def add_child(self, child):
+        child.parent = self
+        self.children.append(child)
+    
+    def __repr__(self):
+        return f"Node({self.name})"
+    
+    def __del__(self):
+        print(f"Node {self.name} 被销毁")
+
+def create_cycle():
+    """创建循环引用"""
+    # 禁用 GC 来观察循环引用问题
+    gc.disable()
+    
+    parent = Node("parent")
+    child1 = Node("child1")
+    child2 = Node("child2")
+    
+    # 创建循环引用
+    parent.add_child(child1)
+    parent.add_child(child2)
+    
+    print(f"创建循环引用前 GC 计数: {gc.get_count()}")
+    
+    # 删除局部引用，但对象间仍有循环引用
+    del parent, child1, child2
+    
+    print(f"删除引用后 GC 计数: {gc.get_count()}")
+    print("注意：对象没有被销毁（没有看到 __del__ 输出）")
+    
+    # 手动运行 GC
+    collected = gc.collect()
+    print(f"手动 GC 回收了 {collected} 个对象")
+    
+    # 重新启用 GC
+    gc.enable()
+
+create_cycle()
+```
+
+#### 24.2.3. 分代垃圾回收（Generational GC）
+
+```python
+import gc
+import time
+
+# Python 使用分代垃圾回收优化性能
+def demonstrate_generational_gc():
+    """演示分代垃圾回收"""
+    
+    print("分代 GC 信息:")
+    print(f"GC 阈值: {gc.get_threshold()}")
+    print(f"各代对象数量: {gc.get_count()}")
+    
+    # 创建大量短生命周期对象（第0代）
+    print("\n创建大量短生命周期对象...")
+    temp_objects = []
+    for i in range(1000):
+        temp_objects.append([i] * 100)
+    
+    print(f"创建后各代对象数量: {gc.get_count()}")
+    
+    # 删除短生命周期对象
+    del temp_objects
+    print(f"删除后各代对象数量: {gc.get_count()}")
+    
+    # 手动触发 GC
+    collected = gc.collect()
+    print(f"GC 回收了 {collected} 个对象")
+    print(f"GC 后各代对象数量: {gc.get_count()}")
+    
+    # 创建长生命周期对象
+    long_lived = []
+    for i in range(100):
+        long_lived.append({"id": i, "data": "long lived data"})
+    
+    print(f"\n创建长生命周期对象后: {gc.get_count()}")
+    
+    # 多次 GC 后，长生命周期对象会被提升到更高代
+    for i in range(3):
+        gc.collect()
+        print(f"第 {i+1} 次 GC 后: {gc.get_count()}")
+
+demonstrate_generational_gc()
+```
+
+### 24.3. GC 性能特点
+
+#### 24.3.1. GC 性能测试
+
+```python
+import gc
+import time
+import random
+from memory_profiler import profile
+
+class GCPerformanceTest:
+    def __init__(self):
+        self.objects = []
+    
+    def test_allocation_performance(self, num_objects=100000):
+        """测试对象分配性能"""
+        
+        # 测试启用 GC 的性能
+        gc.enable()
+        start_time = time.time()
+        
+        for i in range(num_objects):
+            obj = {"id": i, "data": [random.randint(1, 100) for _ in range(10)]}
+            self.objects.append(obj)
+        
+        gc_enabled_time = time.time() - start_time
+        gc_count_enabled = gc.get_count()
+        
+        # 清理对象
+        self.objects.clear()
+        gc.collect()
+        
+        # 测试禁用 GC 的性能
+        gc.disable()
+        start_time = time.time()
+        
+        for i in range(num_objects):
+            obj = {"id": i, "data": [random.randint(1, 100) for _ in range(10)]}
+            self.objects.append(obj)
+        
+        gc_disabled_time = time.time() - start_time
+        gc_count_disabled = gc.get_count()
+        
+        # 重新启用 GC
+        gc.enable()
+        
+        print(f"对象分配性能测试 ({num_objects} 个对象):")
+        print(f"启用 GC 耗时: {gc_enabled_time:.4f}秒")
+        print(f"禁用 GC 耗时: {gc_disabled_time:.4f}秒")
+        print(f"性能差异: {gc_enabled_time / gc_disabled_time:.2f}x")
+        print(f"启用 GC 时对象计数: {gc_count_enabled}")
+        print(f"禁用 GC 时对象计数: {gc_count_disabled}")
+    
+    def test_gc_overhead(self):
+        """测试 GC 开销"""
+        
+        # 创建循环引用对象
+        def create_cycles(n):
+            cycles = []
+            for i in range(n):
+                a = {"name": f"obj_a_{i}"}
+                b = {"name": f"obj_b_{i}"}
+                a["ref"] = b
+                b["ref"] = a
+                cycles.append((a, b))
+            return cycles
+        
+        print("\nGC 开销测试:")
+        
+        # 测试不同数量循环引用的 GC 性能
+        for n in [1000, 5000, 10000]:
+            start_time = time.time()
+            cycles = create_cycles(n)
+            creation_time = time.time() - start_time
+            
+            # 删除引用，触发 GC
+            del cycles
+            
+            start_time = time.time()
+            collected = gc.collect()
+            gc_time = time.time() - start_time
+            
+            print(f"{n} 个循环引用:")
+            print(f"  创建耗时: {creation_time:.4f}秒")
+            print(f"  GC 耗时: {gc_time:.4f}秒")
+            print(f"  回收对象数: {collected}")
+            print(f"  GC 开销比例: {gc_time / creation_time:.2%}")
+
+# 运行性能测试
+test = GCPerformanceTest()
+test.test_allocation_performance()
+test.test_gc_overhead()
+```
+
+#### 24.3.2. 内存泄漏检测
+
+```python
+import gc
+import sys
+from collections import defaultdict
+
+def analyze_memory_leaks():
+    """分析内存泄漏"""
+    
+    # 获取所有对象的类型统计
+    def get_object_stats():
+        stats = defaultdict(int)
+        for obj in gc.get_objects():
+            stats[type(obj).__name__] += 1
+        return stats
+    
+    print("内存泄漏检测:")
+    
+    # 记录初始状态
+    initial_stats = get_object_stats()
+    initial_count = len(gc.get_objects())
+    
+    print(f"初始对象数量: {initial_count}")
+    
+    # 模拟可能的内存泄漏
+    leaked_objects = []
+    
+    class LeakyClass:
+        def __init__(self, data):
+            self.data = data
+            self.circular_ref = self  # 自引用
+    
+    # 创建一些可能泄漏的对象
+    for i in range(1000):
+        obj = LeakyClass(f"data_{i}")
+        leaked_objects.append(obj)
+    
+    # 删除引用但保留循环引用
+    del leaked_objects
+    
+    # 检查对象增长
+    after_stats = get_object_stats()
+    after_count = len(gc.get_objects())
+    
+    print(f"操作后对象数量: {after_count}")
+    print(f"对象增长: {after_count - initial_count}")
+    
+    # 显示增长最多的对象类型
+    print("\n对象类型增长统计:")
+    for obj_type, count in after_stats.items():
+        initial = initial_stats.get(obj_type, 0)
+        if count > initial:
+            print(f"  {obj_type}: {initial} -> {count} (+{count - initial})")
+    
+    # 运行 GC 并检查回收情况
+    collected = gc.collect()
+    final_count = len(gc.get_objects())
+    
+    print(f"\nGC 回收了 {collected} 个对象")
+    print(f"最终对象数量: {final_count}")
+    print(f"净增长: {final_count - initial_count}")
+
+analyze_memory_leaks()
+```
+
+### 24.4. GC 优化策略
+
+#### 24.4.1. 避免循环引用
+
+```python
+import weakref
+
+# 使用弱引用避免循环引用
+class Parent:
+    def __init__(self, name):
+        self.name = name
+        self.children = []
+    
+    def add_child(self, child):
+        child.parent = weakref.ref(self)  # 使用弱引用
+        self.children.append(child)
+    
+    def __repr__(self):
+        return f"Parent({self.name})"
+    
+    def __del__(self):
+        print(f"Parent {self.name} 被销毁")
+
+class Child:
+    def __init__(self, name):
+        self.name = name
+        self.parent = None
+    
+    def get_parent(self):
+        if self.parent is not None:
+            return self.parent()  # 调用弱引用
+        return None
+    
+    def __repr__(self):
+        return f"Child({self.name})"
+    
+    def __del__(self):
+        print(f"Child {self.name} 被销毁")
+
+# 测试弱引用
+def test_weak_references():
+    parent = Parent("parent")
+    child = Child("child")
+    
+    parent.add_child(child)
+    
+    print(f"Child 的父对象: {child.get_parent()}")
+    
+    # 删除父对象
+    del parent
+    
+    print(f"删除父对象后，Child 的父对象: {child.get_parent()}")
+    
+    del child
+
+test_weak_references()
+```
+
+#### 24.4.2. 手动内存管理
+
+```python
+import gc
+from contextlib import contextmanager
+
+@contextmanager
+def gc_disabled():
+    """临时禁用 GC 的上下文管理器"""
+    was_enabled = gc.isenabled()
+    gc.disable()
+    try:
+        yield
+    finally:
+        if was_enabled:
+            gc.enable()
+
+def optimize_bulk_operations():
+    """优化批量操作的 GC 性能"""
+    
+    # 在批量操作时禁用 GC
+    with gc_disabled():
+        # 执行大量对象创建操作
+        large_list = []
+        for i in range(100000):
+            large_list.append({"id": i, "data": f"item_{i}"})
+        
+        print(f"批量操作完成，创建了 {len(large_list)} 个对象")
+    
+    # 操作完成后手动运行 GC
+    collected = gc.collect()
+    print(f"手动 GC 回收了 {collected} 个对象")
+
+# 自定义 GC 阈值
+def tune_gc_thresholds():
+    """调优 GC 阈值"""
+    
+    # 获取当前阈值
+    current = gc.get_threshold()
+    print(f"当前 GC 阈值: {current}")
+    
+    # 对于内存敏感的应用，可以降低阈值
+    gc.set_threshold(500, 10, 10)
+    print(f"调整后 GC 阈值: {gc.get_threshold()}")
+    
+    # 对于性能敏感的应用，可以提高阈值
+    gc.set_threshold(2000, 20, 20)
+    print(f"性能优化 GC 阈值: {gc.get_threshold()}")
+    
+    # 恢复默认阈值
+    gc.set_threshold(*current)
+    print(f"恢复默认阈值: {gc.get_threshold()}")
+
+optimize_bulk_operations()
+tune_gc_thresholds()
+```
+
+### 24.5. GC 监控和调试
+
+```python
+import gc
+import sys
+import tracemalloc
+from functools import wraps
+
+def gc_monitor(func):
+    """GC 监控装饰器"""
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        # 记录执行前状态
+        before_count = gc.get_count()
+        before_objects = len(gc.get_objects())
+        
+        # 执行函数
+        result = func(*args, **kwargs)
+        
+        # 记录执行后状态
+        after_count = gc.get_count()
+        after_objects = len(gc.get_objects())
+        
+        print(f"\n函数 {func.__name__} GC 监控:")
+        print(f"  执行前 GC 计数: {before_count}")
+        print(f"  执行后 GC 计数: {after_count}")
+        print(f"  对象数量变化: {before_objects} -> {after_objects} ({after_objects - before_objects:+d})")
+        
+        return result
+    return wrapper
+
+@gc_monitor
+def memory_intensive_function():
+    """内存密集型函数示例"""
+    data = []
+    for i in range(10000):
+        data.append({"id": i, "values": list(range(100))})
+    return len(data)
+
+# GC 调试工具
+class GCDebugger:
+    def __init__(self):
+        self.callbacks = []
+    
+    def add_callback(self, callback):
+        """添加 GC 回调函数"""
+        self.callbacks.append(callback)
+        gc.callbacks.append(callback)
+    
+    def remove_callbacks(self):
+        """移除所有回调函数"""
+        for callback in self.callbacks:
+            if callback in gc.callbacks:
+                gc.callbacks.remove(callback)
+        self.callbacks.clear()
+    
+    @staticmethod
+    def gc_callback(phase, info):
+        """GC 回调函数"""
+        print(f"GC 事件: phase={phase}, info={info}")
+
+# 使用 GC 调试器
+debugger = GCDebugger()
+debugger.add_callback(GCDebugger.gc_callback)
+
+# 运行测试
+result = memory_intensive_function()
+print(f"函数返回值: {result}")
+
+# 清理
+debugger.remove_callbacks()
+```
+
+### 24.6. GC 最佳实践
+
+1. **避免循环引用**
+   - 使用弱引用（`weakref`）
+   - 及时断开循环引用
+   - 使用上下文管理器自动清理
+
+2. **优化对象生命周期**
+   - 尽早释放不需要的对象
+   - 使用对象池重用对象
+   - 避免全局变量持有大对象
+
+3. **批量操作优化**
+   - 在批量操作时临时禁用 GC
+   - 操作完成后手动触发 GC
+   - 调整 GC 阈值适应应用特点
+
+4. **内存监控**
+   - 定期监控内存使用情况
+   - 使用性能分析工具
+   - 建立内存使用基准
+
+5. **特殊场景处理**
+   - 长时间运行的服务定期清理
+   - 大数据处理时分批处理
+   - 多线程环境注意 GC 的线程安全性
+
+Python 的垃圾回收机制虽然自动化程度很高，但了解其工作原理和性能特点对于编写高效的 Python 程序仍然很重要。合理使用 GC 相关的工具和技术可以显著提升应用程序的性能和稳定性。
+
 
 
 ## 25. Python 项目环境
