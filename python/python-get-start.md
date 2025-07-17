@@ -2758,9 +2758,9 @@ for item in news_items:
 ## 21. Python 单元测试
 
 
-## 24. Python 模块管理
+## 22. Python 模块管理
 
-### 24.1. pip 
+### 22.1. pip 
 
 install pip, pip 是 Python 包管理工具，该工具提供了对Python 包的查找、下载、安装、卸载的功能:
 ```bash
@@ -2820,7 +2820,7 @@ pipreqs .
 
 ```
 
-### 24.2. uv
+### 22.2. uv
 
 uv - An extremely fast Python package and project manager, written in Rust.
 A single tool to replace pip, pip-tools, pipx, poetry, pyenv, twine, virtualenv, and more. 10-100x faster than pip.
@@ -2834,12 +2834,237 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 
 
-## 26. Python 反射
+## 23. Python 反射
+
+Python 支持反射（Reflection），反射是指程序在运行时能够检查、访问和修改自身结构和行为的能力。Python 提供了丰富的内置函数和模块来实现反射功能。
+
+### 23.1. 基本反射函数
+
+```python
+# 检查对象类型和属性
+class Person:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+    
+    def greet(self):
+        return f"Hello, I'm {self.name}"
+    
+    def get_info(self):
+        return f"Name: {self.name}, Age: {self.age}"
+
+person = Person("Alice", 25)
+
+# hasattr() - 检查对象是否有指定属性
+print(hasattr(person, 'name'))      # True
+print(hasattr(person, 'salary'))    # False
+
+# getattr() - 获取对象属性值
+name = getattr(person, 'name')
+print(f"Name: {name}")              # Name: Alice
+
+# 使用默认值
+salary = getattr(person, 'salary', 0)
+print(f"Salary: {salary}")          # Salary: 0
+
+# setattr() - 设置对象属性值
+setattr(person, 'salary', 50000)
+print(f"Salary: {person.salary}")   # Salary: 50000
+
+# delattr() - 删除对象属性
+setattr(person, 'temp', 'temporary')
+print(hasattr(person, 'temp'))      # True
+delattr(person, 'temp')
+print(hasattr(person, 'temp'))      # False
+```
+
+### 23.2. 动态调用方法
+
+```python
+# 动态获取和调用方法
+class Calculator:
+    def add(self, a, b):
+        return a + b
+    
+    def subtract(self, a, b):
+        return a - b
+    
+    def multiply(self, a, b):
+        return a * b
+
+calc = Calculator()
+
+# 通过字符串获取方法
+method_name = 'add'
+if hasattr(calc, method_name):
+    method = getattr(calc, method_name)
+    result = method(10, 5)
+    print(f"{method_name}: {result}")  # add: 15
+
+# 批量调用方法
+operations = ['add', 'subtract', 'multiply']
+for op in operations:
+    if hasattr(calc, op):
+        method = getattr(calc, op)
+        result = method(10, 5)
+        print(f"{op}(10, 5) = {result}")
+```
+
+### 23.3. 使用 dir() 和 vars()
+
+```python
+# dir() - 列出对象的所有属性和方法
+class Sample:
+    class_var = "I'm a class variable"
+    
+    def __init__(self):
+        self.instance_var = "I'm an instance variable"
+    
+    def method(self):
+        pass
+
+sample = Sample()
+
+# 查看对象的所有属性和方法
+print("Object attributes and methods:")
+for attr in dir(sample):
+    if not attr.startswith('_'):  # 过滤私有属性
+        print(f"  {attr}: {type(getattr(sample, attr))}")
+
+# vars() - 返回对象的 __dict__ 属性
+print("\nInstance variables:")
+for key, value in vars(sample).items():
+    print(f"  {key}: {value}")
+```
+
+### 23.4. 动态创建类和对象
+
+```python
+# 使用 type() 动态创建类
+def init_method(self, name):
+    self.name = name
+
+def greet_method(self):
+    return f"Hello from {self.name}"
+
+# 动态创建类
+# type(name, bases, dict)
+DynamicClass = type('DynamicClass', (), {
+    '__init__': init_method,
+    'greet': greet_method,
+    'class_var': 'Dynamic class variable'
+})
+
+# 使用动态创建的类
+obj = DynamicClass("Dynamic Object")
+print(obj.greet())              # Hello from Dynamic Object
+print(obj.class_var)            # Dynamic class variable
+```
+
+### 23.5. 使用 inspect 模块
+
+```python
+import inspect
+
+class ExampleClass:
+    """这是一个示例类"""
+    
+    def __init__(self, value):
+        self.value = value
+    
+    def method_with_args(self, a, b=10, *args, **kwargs):
+        """带参数的方法"""
+        return a + b
+
+obj = ExampleClass(42)
+
+# 检查对象类型
+print(f"Is class: {inspect.isclass(ExampleClass)}")
+print(f"Is method: {inspect.ismethod(obj.method_with_args)}")
+print(f"Is function: {inspect.isfunction(ExampleClass.method_with_args)}")
+
+# 获取方法签名
+sig = inspect.signature(obj.method_with_args)
+print(f"Method signature: {sig}")
+
+# 获取参数信息
+for param_name, param in sig.parameters.items():
+    print(f"Parameter: {param_name}, Default: {param.default}")
+
+# 获取源代码
+print("\nSource code:")
+print(inspect.getsource(ExampleClass.method_with_args))
+
+# 获取文档字符串
+print(f"Docstring: {inspect.getdoc(ExampleClass)}")
+```
+
+### 23.6. 实际应用示例
+
+```python
+# 简单的插件系统示例
+class PluginManager:
+    def __init__(self):
+        self.plugins = {}
+    
+    def register_plugin(self, name, plugin_class):
+        """注册插件"""
+        self.plugins[name] = plugin_class
+    
+    def get_plugin(self, name):
+        """获取插件实例"""
+        if name in self.plugins:
+            return self.plugins[name]()
+        return None
+    
+    def list_plugins(self):
+        """列出所有插件"""
+        return list(self.plugins.keys())
+    
+    def execute_plugin_method(self, plugin_name, method_name, *args, **kwargs):
+        """动态执行插件方法"""
+        plugin = self.get_plugin(plugin_name)
+        if plugin and hasattr(plugin, method_name):
+            method = getattr(plugin, method_name)
+            return method(*args, **kwargs)
+        return None
+
+# 示例插件
+class LoggerPlugin:
+    def log(self, message):
+        print(f"[LOG] {message}")
+
+class EmailPlugin:
+    def send(self, to, subject, body):
+        print(f"[EMAIL] To: {to}, Subject: {subject}")
+        print(f"[EMAIL] Body: {body}")
+
+# 使用插件管理器
+manager = PluginManager()
+manager.register_plugin('logger', LoggerPlugin)
+manager.register_plugin('email', EmailPlugin)
+
+# 动态调用插件方法
+manager.execute_plugin_method('logger', 'log', 'System started')
+manager.execute_plugin_method('email', 'send', 'admin@example.com', 'Alert', 'System alert message')
+
+print(f"Available plugins: {manager.list_plugins()}")
+```
+
+Python 的反射机制非常强大，常用于：
+- 框架开发（如 Django ORM）
+- 插件系统
+- 配置驱动的应用
+- 动态 API 调用
+- 序列化/反序列化
+- 测试框架
 
 
-## 27. Python GC
+## 24. Python GC
 
-## 28. Python 项目环境
+
+
+## 25. Python 项目环境
 
 Python 虚拟环境是一种工具，用于为不同的项目创建独立的 Python 运行环境。
 它的主要目的是解决依赖冲突问题，确保每个项目拥有自己的 Python 解释器和依赖库版本，而不会干扰系统的全局 Python 环境或其他项目。
@@ -2873,7 +3098,7 @@ deactivate
 ```
 
 
-## 29. Python 和 Java 性能对比
+## 26. Python 性能
 
 
 # A. 参考资料
