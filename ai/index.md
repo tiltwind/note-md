@@ -1,5 +1,6 @@
 # ai
 
+- 2025-08-08, [AI编程的基本认知](ai-program-basic-cognitions.html), titlwind
 - 2025-08-03, [AI基本认知](ai-basic-cognitions.html), titlwind
 - 2025-07-17, [AI规则世界](rule-world.html), titlwind
 - 2025-04-15, [AI超级入口竞争分析](super-ai-entry.html), titlwind
