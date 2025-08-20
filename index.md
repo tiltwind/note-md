@@ -6,6 +6,7 @@
 - [python](python)
 - [okr](okr)
 - [mq](mq)
+- [methodology](methodology)
 - [math](math)
 - [go](go)
 - [design](design)
