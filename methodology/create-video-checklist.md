@@ -1,12 +1,12 @@
 <!---
 markmeta_author: titlwind
 markmeta_date: 2025-08-19
-markmeta_title: AI构建视频 checklist
+markmeta_title: 创作视频 checklist
 markmeta_categories: ai
 markmeta_tags: ai, video
 -->
 
-# AI构建视频 checklist
+# 创作视频 checklist
 
 本文档提供一个视频制作流程框架，帮助普通用户制作出高水准的视频内容。
 
@@ -41,10 +41,4 @@ markmeta_tags: ai, video
   - [ ] AI语音合成
   - [ ] AI音乐生成
 - [ ] 调色和特效
-
-## 4. AI增强功能
-
-
-- [ ] 画质增强
-- [ ] AI分析
 
