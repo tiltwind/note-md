@@ -1,5 +1,6 @@
 # ai
 
+- 2025-09-07, [OpenAI 定义的 AI 5个发展阶段](openai-ai-five-stages.html), titlwind
 - 2025-08-08, [AI编程的基本认知](ai-program-basic-cognitions.html), titlwind
 - 2025-08-03, [AI基本认知](ai-basic-cognitions.html), titlwind
 - 2025-07-17, [AI规则世界](rule-world.html), titlwind
