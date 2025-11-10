@@ -1,5 +1,7 @@
 # ai
 
+- [prompts](prompts)
+- [ai-dev](ai-dev)
 - 2025-09-07, [OpenAI 定义的 AI 5个发展阶段](openai-ai-five-stages.html), titlwind
 - 2025-08-08, [AI编程的基本认知](ai-program-basic-cognitions.html), titlwind
 - 2025-08-03, [AI基本认知](ai-basic-cognitions.html), titlwind
@@ -12,24 +14,3 @@
 - 2025-02-19, [LLM 词汇](llm-terms.html), titlwind
 - 2025-02-19, [LLM 格式及模块](llm-model-format-modules.html), titlwind
 - 2025-02-19, [AI联网搜索功能](llm-network-search.html), titlwind
-- 2023-09-16, [AI提示词 —— 代码生成（redis task queue）](prompts-code-gen-redis-queue.html), titlwind
-- 2023-07-31, [AI提示词 —— 项目作战室](prompts-agile-war-room.html), titlwind
-- 2023-07-31, [AI提示词 —— 活动安全](prompts-activity-security.html), titlwind
-- 2023-07-31, [AI提示词 —— 小学数学（苏格拉底教学法）](prompts-math-of-primary-school-socrates-method.html), titlwind
-- 2023-07-31, [AI提示词 —— 小学数学](prompts-math-of-primary-school-1.html), titlwind
-- 2023-07-06, [我与AI助理的一天](one-day-with-ai-assit.html), titlwind
-- 2023-07-06, [AI提示词 —— 营销大师](prompts-market-master.html), titlwind
-- 2023-07-06, [AI提示词 —— 营养专家建议](prompts-cooking-menu.html), titlwind
-- 2023-07-06, [AI提示词 —— 系统设计之经营竞赛系统](prompts-system-design-3a.html), titlwind
-- 2023-07-06, [AI提示词 —— 系统设计之经营竞赛系统](prompts-system-design-3a-v2.html), titlwind
-- 2023-07-06, [AI提示词 —— 生成考试题目](prompts-generate-exam.html), titlwind
-- 2023-07-06, [AI提示词 —— 提示原则](prompts-prompt-principles.html), titlwind
-- 2023-07-06, [AI提示词 —— 客户评价分析](prompts-customer-evaluation-analysis.html), titlwind
-- 2023-07-06, [AI提示词 —— 国际关系分析](prompts-international-relations-analysis.html), titlwind
-- 2023-07-06, [AI提示词 —— 作诗](prompts-write-poem.html), titlwind
-- 2023-07-06, [AI提示词 —— 会议纪要（项目制）](prompts-meeting-summary-project-system.html), titlwind
-- 2023-07-06, [AI提示词 —— 会议总结](prompts-meeting-summary-86.html), titlwind
-- 2023-07-06, [AI提示词 —— 代码生成（解析数据）](prompts-code-gen-csv.html), titlwind
-- 2023-06-30, [Note for Prompt Engineering Techniques (Ibrahim John)](note-for-prompt-engineering-techniques-Ibrahim-john.html), titlwind
-- 2023-06-30, [Note for ChatGPT Prompt Engineering for Developers (Andrew Ng)](note-for-Prompt-Engineering-for-Developers-Andrew-Ng.html), titlwind
-- 2023-06-20, [Prompt Engineering](prompt-engineering.html), titlwind
