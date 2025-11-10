@@ -1,3 +1,10 @@
+<!---
+markmeta_author: tiltwind
+markmeta_date: 2025-11-07
+markmeta_title: DuckDB Help
+markmeta_categories: 工具
+markmeta_tags: duckdb
+-->
 
 # duckdb
 
