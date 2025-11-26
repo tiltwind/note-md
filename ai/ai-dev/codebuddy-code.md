@@ -230,7 +230,8 @@ description: "显示当前的 git 仓库状态并进行分析。"
 ```
 
 
-## 7. sub-agents
+## 7. agents
+
 支持两级来源，按优先级智能合并：
 - 项目级：.codebuddy/agents/
 - 个人全局：~/.codebuddy/agents/
@@ -255,4 +256,10 @@ color: "#4A90E2"
 
 这里是该子代理的系统指令与工作说明……
 ```
+
+运行agents:
+```bash
+cbp "use (my-agent) to do something" --dangerously-skip-permissions
+```
+
 
