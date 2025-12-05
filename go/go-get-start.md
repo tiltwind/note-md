@@ -1056,23 +1056,45 @@ func readFile() {
 }
 ```
 
-### 18.4. iter 包 (Go 1.23)
-
-// 支持迭代器操作
+### 18.4. iter 包
 ```golang
-import "iter"
+// iter: 核心用法速览（from Go 1.23）
+import (
+    "iter"
+    "maps"
+    "slices"
+)
 
-func YieldEven(yield func(int) bool) {
-    for i := 0; i < 10; i += 2 {
-        if !yield(i) {
-            return
+// 1) 自定义迭代器：倒序遍历，Seq2 索引-值
+func Backward[E any](s []E) iter.Seq2[int, E] {
+    return func(yield func(int, E) bool) {
+        for i := len(s) - 1; i >= 0; i-- {
+            if !yield(i, s[i]) { return }
         }
     }
 }
+// 使用：for i, v := range Backward(items) { /* ... */ }
 
-for v := range YieldEven {
-    println(v) // 0,2,4,6,8
+// 2) 标准库迭代器：映射键/值、排序后遍历
+for k := range maps.Keys(map[string]int{"Bob": 1}) { _ = k }
+for v := range maps.Values(map[string]int{"Bob": 1}) { _ = v }
+for _, k := range slices.Sorted(maps.Keys(map[string]int{"Bob": 1})) { _ = k }
+// 切片索引-值：Seq2
+for i, v := range slices.All([]int{10, 20, 30}) { _, _ = i, v }
+
+// 3) 集合封装：返回 Seq 供 for-range
+type Set[E comparable] struct{ data map[E]struct{} }
+func (s *Set[E]) All() iter.Seq[E] {
+    return func(yield func(E) bool) {
+        for v := range s.data { if !yield(v) { return } }
+    }
 }
+// 使用：for v := range mySet.All() { /* ... */ }
+
+// 4) 推转拉：Pull 手动取值与停止
+seq := slices.Values([]int{1, 2, 3})
+next, stop := iter.Pull(seq); defer stop()
+if v, ok := next(); ok { _ = v } // 手动拉取一个
 ```
 
 ### 18.5. structs 包 (Go 1.23)
@@ -1562,5 +1584,3 @@ CPU利用率:
 2. 2022-02-17, wongoo, 增加泛型、select用法、内部包 internal、包初始化函数
 3. 2022-05-19, wongoo, 升级go版本号, helloworld 例子修改
 4. 2025-07-16, wongoo, 添加 Go 1.22 和 1.23 语言特性更新，包括 for range over int、循环变量捕获修复、迭代器支持、泛型类型别名，以及新包 iter、structs、unique
-
-
