@@ -52,7 +52,7 @@ psql -U postgres -h localhost
 sudo yum install -y epel-release
 
 sudo yum search postgis
-sudo yum install -y postgis35_17
+sudo yum install -y postgis36_17
 
 # 注意：CentOS 8 的模块化机制会默认启用旧版 PostgreSQL 模块，若不手动禁用，会导致无法安装或使用官方新版 PostgreSQL。
 # 建议先禁用系统自带 PostgreSQL 模块：
