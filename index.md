@@ -2,6 +2,7 @@
 
 - [tools](tools)
 - [think](think)
+- [rust](rust)
 - [retrospect](retrospect)
 - [python](python)
 - [okr](okr)
