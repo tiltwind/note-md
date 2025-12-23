@@ -214,7 +214,9 @@ Claude Code 的 **Sub-agents（子代理）** 功能，可以根据特定任务�
 
 MCP (Model Context Protocol) 是一种开放标准，允许 AI 助手（如 Claude）安全地连接到本地或远程的数据源和工具。通过配置 MCP 服务器，你可以让 Claude 访问数据库、文件系统、API 等外部资源。
 
-项目目录下创建 `.mcp.json` 。
+配置路径:
+- 用户级别: `~/.claude.json` 文件的 mcpServers 字段
+- 项目级别: 项目目录下 `.mcp.json` 文件
 
 配置文件的基本结构如下：
 
@@ -232,14 +234,24 @@ MCP (Model Context Protocol) 是一种开放标准，允许 AI 助手（如 Clau
 }
 ```
 
+命令添加:
+```bash
+# 通过 -s user 指定用户级别
+claude mcp add <MCP服务器名称> -s user <启动命令>
+claude mcp remove <MCP服务器名称> -s user
+
+claude mcp add chrome-devtools -s user -- npx chrome-devtools-mcp@latest
+```
+
 以下是几个常见的 MCP 服务器配置范例：
 
 #### 6. Chrome DevTools (浏览器调试)
 允许 Claude 控制 Chrome 浏览器进行调试、页面分析等。
 需要先安装：`npm install -g chrome-devtools-mcp`
 
+添加: `claude mcp add chrome-devtools -s user -- npx chrome-devtools-mcp@latest`
 
-配置:
+手动配置:
 ```json
 "mcp__chrome-devtools": {
   "command": "npx",
@@ -252,6 +264,70 @@ MCP (Model Context Protocol) 是一种开放标准，允许 AI 助手（如 Clau
 
 ### 6.3 调试与验证
 配置完成后，重启 Claude Code。你可以通过询问 Claude "列出当前可用的 MCP 工具" 来验证服务器是否加载成功。
+
+
+### 6.3 调试与验证
+配置完成后，重启 Claude Code。你可以通过询问 Claude "列出当前可用的 MCP 工具" 来验证服务器是否加载成功。
+
+
+## 7. Plugins (插件)
+
+Claude Code 的插件系统（Plugins）允许你扩展其能力，包括自定义命令、Agents、Skills 和 MCP 服务器等。
+
+### 7.1 安装与使用
+
+#### 7.1.1 发现插件
+你可以通过以下两种方式查看市场上有哪些可用的插件：
+
+1.  **命令行交互界面**：
+    在 Claude Code 中输入 `/plugin` 命令，会打开一个交互式界面。使用 `Tab` 键在不同标签页之间切换（如 Discover, Installed, Marketplaces）。在 **Discover** 标签页中，你可以浏览所有已添加市场的插件列表。
+
+2.  **网页浏览**：
+    访问非官方的插件索引站 [claude-plugins.dev](https://claude-plugins.dev/) 浏览社区插件，或者直接查看 [Anthropic 官方 GitHub 仓库](https://github.com/anthropics/claude-code/tree/main/plugins)。
+
+#### 7.1.2 安装插件
+安装插件最简单的方法是使用 `/plugin install` 命令。
+
+**推荐安装方式：项目级别 (Project Scope)**
+建议使用 `--scope project` 参数将插件安装到当前项目。这样做的好处是：
+*   **隔离性**：不同项目可以使用不同版本的插件，避免冲突。
+*   **团队共享**：配置会保存在项目的 `.claude/settings.json` 中，团队成员拉取代码后可以获得一致的开发环境。
+
+**基本语法**：
+```bash
+/plugin install <plugin-id> --scope project
+```
+
+**示例**：
+安装官方提供的 Frontend Design 插件到当前项目：
+```bash
+/plugin install frontend-design@claude-code-plugins --scope project
+```
+或者
+```bash
+/plugin install @anthropics/claude-code-plugins/frontend-design --scope project
+```
+
+如果不加 `--scope project`，默认会安装到**用户级别 (User Scope)**，即对该用户的所有项目生效。
+
+### 7.2 常用插件推荐
+
+| 插件名 | ID | 说明 |
+| :--- | :--- | :--- |
+| **Frontend Design** | `frontend-design@claude-code-plugins` | 专注于生成高质量、非通用的前端界面代码，包含设计审美和最佳实践。 |
+| **Commit Commands** | `@anthropics/claude-code-plugins/commit-commands` | 包含 git 提交、推送和创建 PR 的相关命令。 |
+| **Code Review** | `@anthropics/claude-code-plugins/code-review` | 自动化的代码审查插件，提供基于置信度的审查意见。 |
+
+### 7.3 使用建议
+
+1.  **按需安装**：不要一次性安装过多插件，以免造成环境混乱或上下文过载。根据当前项目的需求选择合适的插件。
+2.  **查看文档**：许多插件（特别是官方插件）在 GitHub 上有详细的 `SKILL.md` 或说明文档，安装前建议阅读以了解其具体能力和触发方式。
+3.  **插件管理**：
+    *   列出已安装插件：`/plugin list` (或使用 `npx claude-plugins list`)
+    *   移除插件：`/plugin remove <plugin-id>`
+    *   更新插件：通常需要重新安装最新版本。
+
+> **提示**：插件本质上是 Skills、Prompts 和工具配置的集合。如果你发现某个插件特别好用，可以研究其源码（通常是开源的），学习如何编写更好的 System Prompts 和 Skills。
 
 
 ## A. 感受
