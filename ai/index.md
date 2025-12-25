@@ -1,5 +1,6 @@
 # ai
 
+- [think](think)
 - [prompts](prompts)
 - [ai-dev](ai-dev)
 - 2025-09-07, [OpenAI 定义的 AI 5个发展阶段](openai-ai-five-stages.html), titlwind
