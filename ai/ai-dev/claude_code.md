@@ -388,7 +388,7 @@ Skills 以文件夹的形式存在，核心是一个 `SKILL.md` 文件。
     *   仅对当前项目生效，且可以提交到 Git 仓库与团队共享。
 
 **目录结构示例**：
-```text
+```
 .claude/
 └── skills/
     └── my-custom-skill/      <-- Skill 文件夹名称
@@ -402,7 +402,7 @@ Skills 以文件夹的形式存在，核心是一个 `SKILL.md` 文件。
 `SKILL.md` 由两部分组成：**YAML Frontmatter** (元数据) 和 **Markdown 正文** (指令)。
 
 **基本模板**：
-```markdown
+```
 ---
 name: skill-name-id            # 唯一标识符，只能包含小写字母、数字和连字符
 description: 简短描述这个 Skill 是做什么的，以及 Claude 何时应该使用它。 # 关键字段！Claude 根据此描述决定是否调用
@@ -429,11 +429,12 @@ allowed-tools: [Read, Grep]    # (可选) 限制该 Skill 运行时允许使用�
 2.  创建文件：`.claude/skills/vue-component-gen/SKILL.md`
 3.  写入内容：
 
-```markdown
+```
 ---
 name: vue-component-gen
 description: Generate Vue 3 components following team best practices. Use this whenever the user asks to create or refactor a Vue component.
 ---
+```
 
 # Vue 3 Component Generator
 
@@ -453,7 +454,7 @@ When generating Vue 3 components, you MUST follow these rules:
 User: "Create a button component"
 
 Output:
-\`\`\`vue
+```vue
 <script setup lang="ts">
 interface Props {
   label: string;
@@ -480,7 +481,6 @@ button {
   /* styles */
 }
 </style>
-\`\`\`
 ```
 
 ### 8.5 如何使用

@@ -10,16 +10,15 @@ markmeta_tags: ai,spec
 
 ## 1. 背景
 
-随着 AI 编码能力的增强，一个常见模式是：你描述目标，AI 返回代码块，看起来正确但常常无法直接运行。
-这种“氛围编程” (vibe-coding) 方法适合快速原型，但对于严肃、关键任务的应用或在现有代码库中工作时，可靠性较低。
+随着 AI 编码能力的增强，一个常见模式是：你描述目标，AI 返回代码块，看起来正确但常常无法直接运行,需要进行多轮对话修改。这种“氛围编程” (vibe-coding) 方法适合快速原型，但对于复杂大型项目任务时，可靠性较低。
 
 问题不在于 AI 的编码能力，而在于我们的方法。
 我们像对待搜索引擎一样对待 AI 编码，而实际上应该把它们看作是需要明确指令的“结对程序员”。
 
-为了解决这个问题，规范驱动开发 (Spec-Driven Development, SDD) 应运而生。
-它将规范 (specifications) 重新定义为动态的、可执行的工件，随项目一同演进，成为共享的真理来源。
+为了解决这个问题，规范驱动开发 (Spec-Driven Development, SDD) 应运而生。Spec-Driven Development (SDD) 作为一种明确的 AI 开发范式，最早在 **2024年底至2025年初** 由 **GitHub Next 团队** (通过推出 **GitHub Spec Kit**) 和 **Tessl** 等 AI 开发工具公司共同推动普及。它的提出是对 **"Vibe Coding"** (氛围编程，由 Andrej Karpathy 在 2025 年初普及) 的一种结构化反思。虽然 Vibe Coding 能够通过自然语言提示快速生成原型，但在面对复杂、生产级软件时，往往缺乏一致性和可维护性。SDD 旨在通过将规范 (Spec) 提升为项目的 **“唯一事实来源” (Source of Truth)**，解决 AI 编程中的上下文丢失与幻觉问题。在这种范式下，**规范不再是文档，而是代码的蓝图；代码不再是核心资产，而是规范的下游产物。**
 
 > 扩展: TDD (Test-Driven Development) 也是一种流行的AI编程模式, 它的核心思想是先写测试用例，然后根据测试用例编写代码，确保代码符合预期。
+
 
 ## 2. 定义
 
@@ -34,7 +33,7 @@ markmeta_tags: ai,spec
 - **提升代码质量**: 基于严谨规范生成的代码通常结构更合理。
 - **加速开发周期**: 规范确定后，代码生成和开发效率大幅提升。
 
-**本质上，SDD是一种编程上下文工程方法，提供更清晰的上下文，确保 AI 生成的代码符合预期。**
+> 注：笔者认为, SDD本质上是一种编程上下文工程方法，提供更清晰的上下文，确保 AI 生成的代码符合预期。
 
 
 ### 2.1 核心观点
@@ -54,6 +53,7 @@ markmeta_tags: ai,spec
 - **质量提升**：一致性验证、歧义检测与缺口识别贯穿规范与计划的迭代过程。
 - **快速试错**：早期代码生成用于验证规范的可行性与可测试性，从而更快收敛到正确的实现。
 
+> SDLC: Software Development Life Cycle, 软件开发生命周期
 
 ### 2.3 核心原则
 
@@ -114,6 +114,9 @@ markmeta_tags: ai,spec
 
 `Spec-Kit` 提供了一系列命令行工具和模板，与 Cursor、Claude Code、Gemini CLI 等 AI 编码工具深度集成。它包含四阶段核心工作流和一些辅助命令。
 
+**初始化**
+- `/speckit.constitution`: 定义项目的核心原则和开发规范。
+
 **核心工作流**
 - `/speckit.specify`: 将功能需求转化为清晰的规范文档。
 - `/speckit.plan`: 制定功能的技术实现方案。
@@ -121,35 +124,29 @@ markmeta_tags: ai,spec
 - `/speckit.implement`: 按任务清单逐步实现功能代码。
 
 **辅助命令**
-- `/speckit.constitution`: 定义项目的核心原则和开发规范。
-- `/speckit.clarify`: 解决规范中的模糊和歧义问题。
-- `/speckit.analyze`: 检查规范、计划、任务的一致性。
-- `/speckit.checklist`: 生成需求质量验证清单。
+- `/speckit.clarify`: 解决规范中的模糊和歧义问题（可选, plan之前）
+- `/speckit.checklist`: 生成需求质量验证清单（可选, plan之后）
+- `/speckit.analyze`: 检查规范、计划、任务的一致性（可选, task之后, implement之前）
 
 ### 4.2 Spec-Kit 使用方式
 
-1.  **安装 `specify-cli`**:
-
+安装 `specify-cli`:
 ```bash
 uv tool install specify-cli --from git+https://github.com/github/spec-kit.git
-
 # upgrade
 uv tool install specify-cli --force --from git+https://github.com/github/spec-kit.git
 ```
     
-2.  **初始化项目**:
-
-在项目目录中，使用 AI 助手（如 Cursor）运行初始化命令，并指定 AI 代理。
-
+初始化项目, 在项目目录中，运行初始化命令，并指定 AI 代理为 Claude。
 ```bash
-specify init . --ai cursor
+specify init . --ai claude
 ```
     
-3.  **执行工作流**:
-
-在 AI 助手的聊天框中，依次使用 `/speckit.*` 命令来完成开发流程。
-
+执行工作流, 启动 Claude Code 并使用 `/speckit.*` 命令来完成开发流程。
 ```bash
+# 启动 Claude Code
+claude
+
 # 1. 创建规范
 /speckit.specify 开发一个用户注册功能...
 
@@ -162,7 +159,8 @@ specify init . --ai cursor
 # 4. 实现代码
 /speckit.implement
 ```
-    
+
+> 注: speckit 消化 token 很大。
 
 ## 5. Claude Code Spec Workflow
 
@@ -287,7 +285,6 @@ tree .claude
 - GitHub 博客：Spec-Driven Development 概览与工具包 — https://github.blog/ai-and-ml/generative-ai/spec-driven-development-with-ai-get-started-with-a-new-open-source-toolkit/
 - 官方文档：Specification-Driven Development 详解 — https://github.com/github/spec-kit/blob/main/spec-driven.md
 - GitHub 项目：Spec-Kit 开源工具集 — https://github.com/github/spec-kit
-- 中文资源：Spec-Kit 中文版与文档 — https://github.com/888888888881/spec-kit-chinese
 - 项目仓库：Claude Code Spec Workflow — https://github.com/Pimzino/claude-code-spec-workflow
 - 中文解读：Claude Code Spec Workflow 工作流介绍 — https://zhuanlan.zhihu.com/p/1948519805884805722
 
