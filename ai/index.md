@@ -3,6 +3,7 @@
 - [think](think)
 - [prompts](prompts)
 - [ai-dev](ai-dev)
+- 2026-01-29, [AI时代用户交互变革：红利与市场推广策略](ai-market.html), wongoo
 - 2025-09-07, [OpenAI 定义的 AI 5个发展阶段](openai-ai-five-stages.html), titlwind
 - 2025-08-08, [AI编程的基本认知](ai-program-basic-cognitions.html), titlwind
 - 2025-08-03, [AI基本认知](ai-basic-cognitions.html), titlwind
