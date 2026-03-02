@@ -11,11 +11,50 @@ markmeta_tags: ai,claude-code
 
 ## 1. 安装
 ```bash
-sudo npm install -g @anthropic-ai/claude-code
-
-# upgrade
-sudo npm install -g @anthropic-ai/claude-code@latest
+curl -fsSL https://claude.ai/install.sh | bash
 ```
+
+权限配置:
+
+全局配置文件路径: `~/.claude/settings.json`
+
+通过 `permissions` 字段配置全局权限规则，允许的操作将不再弹出确认提示。
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Read(/Users/hk/**)",
+      "Edit(/Users/hk/workspaces/**)",
+      "Write(/Users/hk/workspaces/**)",
+      "WebSearch",
+      "WebFetch",
+      "Bash(git *)"
+    ]
+  }
+}
+```
+
+| 权限规则 | 作用 |
+| :--- | :--- |
+| `Read(/Users/hk/**)` | 允许读取 `/Users/hk/` 下所有文件 |
+| `Edit(/Users/hk/workspaces/**)` | 允许编辑 `/Users/hk/workspaces/` 下所有文件 |
+| `Write(/Users/hk/workspaces/**)` | 允许写入/创建 `/Users/hk/workspaces/` 下所有文件 |
+| `WebSearch` | 允许网页搜索 |
+| `WebFetch` | 允许网页抓取 |
+| `Bash(git *)` | 允许所有 git 命令 |
+
+配置文件优先级（从高到低）:
+1. 托管设置（IT 部署，不可覆盖）
+2. 命令行参数
+3. 项目本地 `.claude/settings.local.json`
+4. 项目共享 `.claude/settings.json`
+5. 用户全局 `~/.claude/settings.json`
+
+更多权限规则示例:
+- `Bash(npm run *)` — 允许所有 npm run 脚本
+- `Bash(docker *)` — 允许所有 docker 命令
+- `Read(/etc/hosts)` — 允许读取特定文件
 
 ## 1.1 使用deepseek模型
 
@@ -531,6 +570,20 @@ Claude 会：
 
 > **提示**：不同终端模拟器可能会拦截某些快捷键（如 `Option` 键）。如果遇到问题，请检查终端的 Meta/Option 键配置，或运行 `/terminal-setup` 进行自动配置。
 
+
+## 10. 安装 ui 界面
+
+参考 https://github.com/siteboon/claudecodeui
+
+```bash
+npm install -g @siteboon/claude-code-ui
+
+# 运行
+claude-code-ui
+
+# 升级
+cloudcli update
+```
 
 ## A. 感受
 

@@ -1,5 +1,7 @@
 # ai-dev
 
+- 2026-02-27, [AI 开发认知变化历程](ai-dev-cognitive-change.html), tiltwind
+- 2026-02-25, [OpenClaw 个人 AI Agent 助手快速搭建指南](openclaw.html), tiltwind
 - 2026-02-24, [ZeroClaw 轻量级安全 AI Agent 运行时](zeroclaw.html), tiltwind
 - 2026-01-22, [Claude Code Skill 技能系统详解](claude-code-skill.html), titlwind
 - 2026-01-22, [Claude Code Best Practices](ai-dev-claude-code-best-practice.html), tiltwind
