@@ -10,6 +10,7 @@
 - [methodology](methodology)
 - [math](math)
 - [go](go)
+- [fin](fin)
 - [design](design)
 - [db](db)
 - [cloudnative](cloudnative)
