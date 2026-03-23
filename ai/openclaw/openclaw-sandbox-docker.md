@@ -48,29 +48,90 @@ sudo usermod -aG docker $USER
 
 ## 3. 沙箱镜像
 
-### 3.1 使用默认镜像
+OpenClaw 项目根目录提供了两个官方 Dockerfile，分别用于构建基础沙箱和浏览器沙箱镜像。
 
-OpenClaw 提供预构建的沙箱镜像 `openclaw-sandbox:bookworm-slim`，基于 Debian Bookworm 最小化版本：
+### 3.1 基础沙箱镜像（Dockerfile.sandbox）
+
+预装工具：`bash`、`ca-certificates`、`curl`、`git`、`jq`、`python3`、`ripgrep`
+
+构建命令：
 
 ```bash
-# 拉取沙箱镜像
-docker pull openclaw-sandbox:bookworm-slim
+cd openclaw   # 项目根目录
+docker build -f Dockerfile.sandbox -t openclaw-sandbox:bookworm-slim .
 ```
 
-### 3.2 自定义镜像
+### 3.2 浏览器沙箱镜像（Dockerfile.sandbox-browser）
 
-如果 Agent 需要特定工具（如 Python、Node.js、编译器等），可以基于默认镜像构建自定义版本：
+在基础镜像之上增加了 Chromium 浏览器和远程桌面支持，适用于需要浏览器操作（网页抓取、自动化测试等）的 Agent：
+
+构建命令：
+
+```bash
+cd openclaw   # 项目根目录（需要 scripts/sandbox-browser-entrypoint.sh）
+docker build -f Dockerfile.sandbox-browser -t openclaw-sandbox:browser .
+```
+**在 openclaw.json 中使用浏览器沙箱**：
+
+```json5
+{
+  "sandbox": {
+    "mode": "all",
+    "docker": {
+      "image": "openclaw-sandbox:browser",
+      "readOnlyRoot": false,         // 浏览器需要写入临时文件
+      "network": "bridge",           // 浏览器通常需要网络访问
+      "memory": "2g",                // 浏览器消耗内存较多
+      "cpus": 2
+    }
+  }
+}
+```
+
+### 3.3 两种镜像的选择
+
+| 场景 | 推荐镜像 |
+|------|---------|
+| 文件处理、脚本执行、代码操作 | `openclaw-sandbox:bookworm-slim`（基础镜像） |
+| 网页浏览、数据抓取、Web 自动化 | `openclaw-sandbox:browser`（浏览器镜像） |
+| 不同 Agent 不同需求 | 在多 Agent 配置中为各 Agent 指定不同镜像 |
+
+```json5
+{
+  "agents": {
+    "list": [
+      {
+        "id": "developer",
+        "sandbox": {
+          "docker": { "image": "openclaw-sandbox:bookworm-slim" }
+        }
+      },
+      {
+        "id": "researcher",
+        "sandbox": {
+          "docker": {
+            "image": "openclaw-sandbox:browser",
+            "network": "bridge"
+          }
+        }
+      }
+    ]
+  }
+}
+```
+
+### 3.4 自定义镜像
+
+如果官方镜像不满足需求，可基于官方镜像扩展：
 
 ```dockerfile
 FROM openclaw-sandbox:bookworm-slim
 
-# 安装 Agent 工作所需的工具
+# 安装额外工具
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git \
-    curl \
-    jq \
-    python3 \
     python3-pip \
+    nodejs \
+    npm \
     && rm -rf /var/lib/apt/lists/*
 ```
 
