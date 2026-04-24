@@ -167,3 +167,58 @@ type ArgExtractor func(parsed map[string]any) (string, error)
 ### 错误处理策略
 
 Agent 执行错误转为 `ToolResult{IsError: true}`，而非 Go error，保持 LLM 工具调用循环可见性。
+
+## 6. 工具安全机制
+
+### 6.1 共享路径验证 (toolkit.ValidatePath)
+
+所有文件工具（read、write、edit）共享的路径验证函数，执行以下检查：
+
+1. **UNC 路径拦截** — 拒绝 `\\server\share` 和 `//server/share` 格式的网络路径，防止代理被诱导访问远程网络共享。
+2. **绝对路径要求** — 路径必须为绝对路径。
+3. **允许目录限制** — 路径必须在配置的允许目录列表内。
+
+### 6.2 Edit 工具安全流水线
+
+Edit 工具在执行文件修改前按顺序执行多阶段安全检查，任一阶段失败即终止并返回可操作的错误信息：
+
+```
+JSON 解析 → ValidatePath (含 UNC 检查) → 拒绝规则检查 → 读取前置检查 → 文件锁 → os.Stat → 写权限检查 → 文件大小检查 → 执行替换
+```
+
+#### 配置选项
+
+```go
+func WithMaxFileBytes(n int64) Option              // 最大文件大小（默认 10 MB）
+func WithDenyRules(patterns ...string) Option      // 拒绝规则（glob 模式，匹配 basename）
+func WithReadTracker(tracker toolkit.ReadTracker) Option  // 读取前置检查
+```
+
+#### 拒绝规则 (Deny Rules)
+
+通过 `WithDenyRules` 配置 glob 模式列表（如 `*.env`、`*.lock`、`credentials.json`），匹配文件 basename。匹配的文件被禁止编辑，错误信息包含匹配的规则名。
+
+#### ReadTracker（读取跟踪器）
+
+```go
+type ReadTracker interface {
+    HasRead(path string) bool
+    RecordRead(path string)
+}
+```
+
+- `MemoryReadTracker`：线程安全的内存实现，支持 `maxEntries` 上限（达到上限后清空重置）。
+- Read 工具在成功读取文件后调用 `RecordRead`；Edit 工具在编辑前调用 `HasRead` 检查。
+- 同一 `ReadTracker` 实例需同时注入 Read 和 Edit 工具。
+- 未配置时两个工具行为与之前一致（向后兼容）。
+
+#### 写权限预检
+
+在 `os.Stat` 成功后检查 owner write bit，只读文件返回包含文件权限模式的错误信息。
+
+#### 错误信息改进
+
+所有错误信息统一使用 `"edit tool: "` 前缀，并包含可操作的指导：
+- `old_string` 未找到 → 提示可能的空白/缩进不匹配或文件已变更。
+- 文件大小超限 → 同时显示实际大小和限制大小。
+- 拒绝规则匹配 → 显示匹配的模式名。
